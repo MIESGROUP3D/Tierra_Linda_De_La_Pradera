@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 // Subcarpeta de despliegue, controlada por variable de entorno:
-//   • GitHub Pages  -> NEXT_PUBLIC_BASE_PATH="/NEXARQ" (lo pone el workflow)
+//   • GitHub Pages  -> NEXT_PUBLIC_BASE_PATH="/<repo>" (lo pone el workflow)
 //   • Raiz dominio  -> sin variable
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 

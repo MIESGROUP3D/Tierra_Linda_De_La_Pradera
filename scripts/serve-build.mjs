@@ -1,11 +1,13 @@
-// Servidor estático para probar el build (out/) con basePath /NEXARQ.
+// Servidor estático para probar el build (out/) con el mismo basePath que
+// GitHub Pages. Usa NEXT_PUBLIC_BASE_PATH (el del build), p.ej.:
+//   NEXT_PUBLIC_BASE_PATH=/Tierra_Linda_De_La_Pradera node scripts/serve-build.mjs
 import { createServer } from 'http';
 import { readFile, stat } from 'fs/promises';
 import { join, extname } from 'path';
 
 const ROOT = join(process.cwd(), 'out');
 const PORT = 4000;
-const PREFIX = '/NEXARQ';
+const PREFIX = process.env.NEXT_PUBLIC_BASE_PATH ?? '/Tierra_Linda_De_La_Pradera';
 
 const TYPES = {
   '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css',

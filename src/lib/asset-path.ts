@@ -1,5 +1,5 @@
 // Prefijo base de los assets de la app (panoramas, hero, logos):
-//   • GitHub Pages    -> NEXT_PUBLIC_BASE_PATH="/NEXARQ" (rutas absolutas con subpath)
+//   • GitHub Pages    -> NEXT_PUBLIC_BASE_PATH="/<repo>" (rutas absolutas con subpath)
 //   • Raíz de dominio  -> sin variable (rutas absolutas desde /)
 //   • Entrega PORTABLE -> NEXT_PUBLIC_PORTABLE_BUILD="1" -> base '.' -> rutas
 //     RELATIVAS al documento ('./projects/x.jpg'), para servir en CUALQUIER

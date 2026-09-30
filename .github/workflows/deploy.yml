@@ -31,8 +31,9 @@ jobs:
         run: bun run build
         env:
           NODE_ENV: production
-          # GitHub Pages sirve el sitio bajo /NEXARQ/
-          NEXT_PUBLIC_BASE_PATH: /NEXARQ
+          # GitHub Pages sirve el sitio bajo /<nombre-del-repo>/
+          # (hoy /Tierra_Linda_De_La_Pradera/); se toma del repo para no hardcodearlo
+          NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
