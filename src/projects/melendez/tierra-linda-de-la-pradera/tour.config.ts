@@ -12,7 +12,7 @@ import { assetPath } from '@/lib/asset-path';
 //    gris oscuro #333333 · rojo #E3000F
 //
 //  PENDIENTE:
-//    - Hotspots del Balcon (el resto ya calibrados arrastrando en ?debug=1)
+//    - (hotspots de las 8 escenas calibrados arrastrando en ?debug=1)
 //    - Puntos del plano: ubicados a ojo, afinar con ?debug=1
 //
 //  ACTIVACION:
@@ -163,7 +163,24 @@ export const tierraLindaTipoG: TourConfig = {
               description: 'Balcón',
               panorama: PANO_G('balcon.jpg'),
               defaultView: { pitch: 0, yaw: 0, hfov: 100 },
-              hotspots: [],
+              hotspots: [
+                {
+                  id: 'tl-tg-balcon-to-sala-comedor',
+                  pitch: -25, yaw: 151.1,
+                  type: 'scene',
+                  label: 'Sala Comedor',
+                  description: 'Ir a sala comedor',
+                  targetSceneId: 'tl-tg-sala-comedor',
+                },
+                {
+                  id: 'tl-tg-balcon-to-cocina',
+                  pitch: -3.1, yaw: 169.4,
+                  type: 'scene',
+                  label: 'Cocina',
+                  description: 'Ir a cocina',
+                  targetSceneId: 'tl-tg-cocina',
+                },
+              ],
             },
 
             // --- ESCENA: ESTUDIO ---
