@@ -19,6 +19,14 @@ import {
   PLAYBACK_HFOV,
 } from '@/lib/playback-utils';
 import { useTourStore } from '@/lib/tour-store';
+import {
+  useDebugEdits,
+  effectiveHotspots,
+  effectiveVariantButton,
+  debugEditsEnabled,
+  type SpotPos,
+  type SpotStatus,
+} from '@/lib/debug-edits-store';
 import { assetPath, mobilePanorama } from '@/lib/asset-path';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -99,7 +107,7 @@ const HOTSPOT_CSS = `
   content: '';
   position: absolute;
   border-radius: 50%;
-  border: 2px solid rgba(232,217,176,0.4);
+  border: 2px solid rgba(255, 255, 255,0.4);
   animation: bubble-pulse var(--pulse-dur, 2.8s) ease-out infinite;
   animation-delay: var(--pulse-delay, 0s);
 }
@@ -108,7 +116,7 @@ const HOTSPOT_CSS = `
 }
 .pano-bubble-rings::after {
   inset: -20px;
-  border-color: rgba(232,217,176,0.18);
+  border-color: rgba(255, 255, 255,0.18);
   animation-delay: calc(var(--pulse-delay, 0s) + 0.5s);
 }
 
@@ -120,14 +128,14 @@ const HOTSPOT_CSS = `
   background: rgba(10, 10, 10, 0.68);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 2px solid rgba(232,217,176,0.55);
+  border: 2px solid rgba(255, 255, 255,0.55);
   display: flex;
   align-items: center;
   justify-content: center;
   color: rgba(255,255,255,0.92);
   position: relative;
   box-shadow:
-    0 0 0 1px rgba(232,217,176,0.15),
+    0 0 0 1px rgba(255, 255, 255,0.15),
     0 8px 32px rgba(0,0,0,0.5),
     0 2px 8px rgba(0,0,0,0.4);
   transition: box-shadow 0.25s ease, background 0.25s ease, border-color 0.25s ease;
@@ -135,9 +143,9 @@ const HOTSPOT_CSS = `
 
 .pano-bubble:hover .pano-bubble-circle {
   background: rgba(20, 20, 20, 0.80);
-  border-color: rgba(232,217,176,0.85);
+  border-color: rgba(255, 255, 255,0.85);
   box-shadow:
-    0 0 0 2px rgba(232,217,176,0.35),
+    0 0 0 2px rgba(255, 255, 255,0.35),
     0 12px 48px rgba(0,0,0,0.55),
     0 4px 16px rgba(0,0,0,0.4);
 }
@@ -145,7 +153,7 @@ const HOTSPOT_CSS = `
 /* ── Room name pill ──────────────────────────────────────────── */
 .pano-bubble-label {
   background: rgba(0,0,0,0.72);
-  border: 1px solid rgba(232,217,176,0.3);
+  border: 1px solid rgba(255, 255, 255,0.3);
   border-radius: 24px;
   padding: 3px 10px;
   font-size: 9px;
@@ -154,14 +162,14 @@ const HOTSPOT_CSS = `
   white-space: nowrap;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.45), 0 0 0 1px rgba(232,217,176,0.08);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.45), 0 0 0 1px rgba(255, 255, 255,0.08);
   backdrop-filter: blur(8px);
 }
 
 /* ── Info variant ────────────────────────────────────────────── */
 .pano-bubble-info .pano-bubble-circle {
-  border-color: rgba(232,217,176,0.55);
-  color: rgba(232,217,176,0.95);
+  border-color: rgba(255, 255, 255,0.55);
+  color: rgba(255, 255, 255,0.95);
   animation-delay: 1.3s;
 }
 
@@ -174,6 +182,14 @@ const HOTSPOT_CSS = `
   0%   { transform: scale(1);    opacity: 0.7; }
   100% { transform: scale(1.85); opacity: 0;   }
 }
+
+/* ── Debug: spots arrastrables ──────────────────────────────── */
+.pano-debug-drag { cursor: grab !important; touch-action: none; }
+.pano-debug-drag.is-dragging { cursor: grabbing !important; z-index: 20; }
+.pano-debug-drag .pano-bubble { animation: none; }
+.pano-debug-drag .pano-bubble-circle { outline: 2px dashed rgba(93,213,240,0.9); outline-offset: 4px; }
+.pano-debug-drag[data-debug-status="moved"] .pano-bubble-circle { outline-color: #FFC080; }
+.pano-debug-drag[data-debug-status="added"] .pano-bubble-circle { outline-color: #80E090; }
 
 /* ── Playback mode: ocultar burbujas ────────────────────────── */
 .playback-mode .pnlm-hotspot-base {
@@ -340,10 +356,10 @@ function buildVariantHotspotDiv(nextVariantLabel: string): HTMLDivElement {
 
   const circle = document.createElement('div');
   circle.className = 'pano-bubble-circle';
-  circle.style.background = '#E8D9B0';
+  circle.style.background = '#FFFFFF';
   circle.style.borderColor = 'rgba(255,255,255,0.45)';
-  circle.style.color = '#0a0806';
-  circle.style.boxShadow = '0 4px 20px rgba(232,217,176,0.4), 0 2px 8px rgba(0,0,0,0.35)';
+  circle.style.color = '#0A0A0A';
+  circle.style.boxShadow = '0 4px 20px rgba(255, 255, 255,0.4), 0 2px 8px rgba(0,0,0,0.35)';
 
   const rings = document.createElement('div');
   rings.className = 'pano-bubble-rings';
@@ -351,7 +367,7 @@ function buildVariantHotspotDiv(nextVariantLabel: string): HTMLDivElement {
 
   // Icono de capas (Layers) en SVG, 20x20
   const iconWrap = document.createElement('div');
-  iconWrap.style.cssText = 'position:relative;z-index:1;display:flex;align-items:center;justify-content:center;color:#0a0806;';
+  iconWrap.style.cssText = 'position:relative;z-index:1;display:flex;align-items:center;justify-content:center;color:#0A0A0A;';
   iconWrap.innerHTML = `
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
          stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -366,12 +382,72 @@ function buildVariantHotspotDiv(nextVariantLabel: string): HTMLDivElement {
   const pill = document.createElement('div');
   pill.className = 'pano-bubble-label';
   pill.textContent = `Ver ${nextVariantLabel.toLowerCase()}`;
-  pill.style.background = 'rgba(232,217,176,0.95)';
-  pill.style.color = '#0a0806';
+  pill.style.background = 'rgba(255, 255, 255,0.95)';
+  pill.style.color = '#0A0A0A';
   pill.style.fontWeight = '700';
   wrapper.appendChild(pill);
 
   return wrapper;
+}
+
+/* ── Debug: hace arrastrable un hotspot de Pannellum ─────────────
+   Durante el arrastre se mueve el objeto hotspot en vivo (Pannellum lo
+   re-proyecta en cada frame); al soltar se guarda la posicion con onDrop.
+   Un click sin arrastre sigue navegando normalmente. */
+function makeHotspotDraggable(
+  div: HTMLElement,
+  hotspotId: string,
+  status: SpotStatus,
+  getViewer: () => PannellumViewer | null,
+  draggedRef: { current: boolean },
+  onDrop: (pos: SpotPos) => void,
+) {
+  div.classList.add('pano-debug-drag');
+  div.dataset.debugStatus = status;
+  // Evita que Pannellum empiece a rotar la vista al presionar el spot
+  const stop = (e: Event) => e.stopPropagation();
+  div.addEventListener('mousedown', stop);
+  div.addEventListener('touchstart', stop, { passive: true });
+
+  div.addEventListener('pointerdown', (e: PointerEvent) => {
+    if (e.button !== 0) return;
+    e.stopPropagation();
+    e.preventDefault();
+    const viewer = getViewer();
+    if (!viewer) return;
+    const spot = (viewer.getConfig()?.hotSpots ?? []).find((h: { id: string }) => h.id === hotspotId);
+    if (!spot) return;
+    const startX = e.clientX;
+    const startY = e.clientY;
+    let dragging = false;
+
+    const onMove = (ev: PointerEvent) => {
+      if (!dragging && Math.hypot(ev.clientX - startX, ev.clientY - startY) < 4) return;
+      dragging = true;
+      div.classList.add('is-dragging');
+      try {
+        const [pitch, yaw] = viewer.mouseEventToCoords(ev);
+        spot.pitch = pitch;
+        spot.yaw = yaw;
+        viewer.setUpdate(true);
+      } catch { /* ignore */ }
+    };
+    const onUp = () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      window.removeEventListener('pointercancel', onUp);
+      div.classList.remove('is-dragging');
+      try { viewer.setUpdate(false); } catch { /* ignore */ }
+      if (!dragging) return;
+      // Bloquea el click que el navegador dispara al soltar
+      draggedRef.current = true;
+      setTimeout(() => { draggedRef.current = false; }, 80);
+      onDrop({ pitch: spot.pitch, yaw: spot.yaw });
+    };
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+    window.addEventListener('pointercancel', onUp);
+  });
 }
 
 /* ------------------------------------------------------------------ */
@@ -449,6 +525,11 @@ const PanoViewer = forwardRef<PanoViewerHandle, PanoViewerProps>(
 
     /* ── Debug flag (?debug=1) ─────────────────────────────────── */
     const debugEnabled = typeof window !== 'undefined' && window.location.search.includes('debug=1');
+    // Spots arrastrables (solo debug en desarrollo). `debugRev` sube al agregar
+    // o borrar un spot, y reconstruye la escena para mostrarlo.
+    const editsOn = debugEditsEnabled();
+    const debugRev = useDebugEdits((s) => s.rev);
+    const draggedRef = useRef(false);
 
     /* ── Inject CSS once ───────────────────────────────────────── */
     useEffect(() => {
@@ -518,37 +599,66 @@ const PanoViewer = forwardRef<PanoViewerHandle, PanoViewerProps>(
         // Si hay override, lo usamos como vista inicial (preserva direccion)
         const initialView = viewOverride ?? defaultView;
 
-        const hotspots: Record<string, unknown>[] = (scene.hotspots ?? []).map(
-          (hs: HotspotConfig, idx: number) => ({
-            id: `hs-${sceneId}-${idx}`,
-            pitch: hs.pitch,
-            yaw: hs.yaw,
-            type: 'custom' as const,
-            createTooltipFunc: (hotSpotDiv: HTMLElement) => {
-              hotSpotDiv.style.cssText = 'cursor:pointer;';
-              hotSpotDiv.appendChild(buildHotspotDiv(hs));
-            },
-            clickHandlerFunc: () => {
-              onHotspotClick?.(hs);
-            },
-          }),
+        // En debug se aplican los spots movidos / nuevos / borrados guardados
+        const edits = editsOn ? useDebugEdits.getState() : null;
+        const sceneHotspots = edits
+          ? effectiveHotspots(scene, edits)
+          : (scene.hotspots ?? []).map((h) => ({ ...h, status: 'config' as SpotStatus }));
+        const variantButton = edits ? effectiveVariantButton(scene, edits) : scene.variantButton;
+        const getActiveViewer = () => viewerRef.current;
+
+        const hotspots: Record<string, unknown>[] = sceneHotspots.map(
+          ({ status, ...hs }, idx: number) => {
+            const pnlmId = `hs-${sceneId}-${idx}`;
+            return {
+              id: pnlmId,
+              pitch: hs.pitch,
+              yaw: hs.yaw,
+              type: 'custom' as const,
+              createTooltipFunc: (hotSpotDiv: HTMLElement) => {
+                hotSpotDiv.style.cssText = 'cursor:pointer;';
+                hotSpotDiv.appendChild(buildHotspotDiv(hs));
+                if (edits) {
+                  makeHotspotDraggable(hotSpotDiv, pnlmId, status, getActiveViewer, draggedRef, (pos) =>
+                    useDebugEdits.getState().moveHotspot(sceneId, hs.id, pos),
+                  );
+                }
+              },
+              clickHandlerFunc: () => {
+                if (draggedRef.current) return;
+                onHotspotClick?.(hs);
+              },
+            };
+          },
         );
 
         // Hotspot extra para cambiar de variante (solo si la escena tiene >=2 variants y posicion definida)
-        if (variants.length >= 2 && scene.variantButton) {
+        if (variants.length >= 2 && variantButton) {
           const currentVariantIdx = Math.max(0, variants.findIndex((v) => v.id === (variantId ?? variants[0].id)));
           const nextIdx = (currentVariantIdx + 1) % variants.length;
           const nextVariant = variants[nextIdx];
+          const variantPnlmId = `hs-${sceneId}-variant`;
           hotspots.push({
-            id: `hs-${sceneId}-variant`,
-            pitch: scene.variantButton.pitch,
-            yaw: scene.variantButton.yaw,
+            id: variantPnlmId,
+            pitch: variantButton.pitch,
+            yaw: variantButton.yaw,
             type: 'custom' as const,
             createTooltipFunc: (hotSpotDiv: HTMLElement) => {
               hotSpotDiv.style.cssText = 'cursor:pointer;';
               hotSpotDiv.appendChild(buildVariantHotspotDiv(nextVariant.label));
+              if (edits) {
+                makeHotspotDraggable(
+                  hotSpotDiv,
+                  variantPnlmId,
+                  edits.variantBtn[sceneId] ? 'moved' : 'config',
+                  getActiveViewer,
+                  draggedRef,
+                  (pos) => useDebugEdits.getState().moveVariantButton(sceneId, pos),
+                );
+              }
             },
             clickHandlerFunc: () => {
+              if (draggedRef.current) return;
               // Si la variante apunta a otra escena, navegamos alli.
               // Esto sucede cuando el "render alternativo" corresponde
               // fisicamente a otro cuarto del apartamento (ej: el render
@@ -601,7 +711,7 @@ const PanoViewer = forwardRef<PanoViewerHandle, PanoViewerProps>(
           maxPitch: 85,
         };
       },
-      [scenes, autoRotate, autoRotateSpeed, onHotspotClick, debugEnabled, selectedVariants, setSceneVariant, setCurrentScene, isMobile, pbHfov],
+      [scenes, autoRotate, autoRotateSpeed, onHotspotClick, debugEnabled, editsOn, selectedVariants, setSceneVariant, setCurrentScene, isMobile, pbHfov],
     );
 
     /* ── Crea viewer en un layer especifico (A o B) ────────────── */
@@ -782,7 +892,7 @@ const PanoViewer = forwardRef<PanoViewerHandle, PanoViewerProps>(
       } else {
         doCrossfade();
       }
-    }, [scriptReady, currentSceneId, currentVariantId, initViewerOnLayer, setTransitioning]);
+    }, [scriptReady, currentSceneId, currentVariantId, debugRev, initViewerOnLayer, setTransitioning]);
 
     /* ── Fullscreen change handler ─────────────────────────────── */
     useEffect(() => {
@@ -1007,12 +1117,12 @@ const PanoViewer = forwardRef<PanoViewerHandle, PanoViewerProps>(
           <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 0, zIndex: 100, background: '#000' }}>
             <BrandLogo style={{ width: 180 }} />
             <div style={{ position: 'relative', width: 36, height: 36, marginTop: 28, marginBottom: 20 }}>
-              <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '2px solid transparent', borderTopColor: '#E8D9B0', animation: 'pano-spin 1.2s linear infinite' }} />
-              <div style={{ position: 'absolute', inset: 4, borderRadius: '50%', border: '2px solid transparent', borderTopColor: 'rgba(232,217,176,0.3)', animation: 'pano-spin 1.8s linear infinite reverse' }} />
+              <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '2px solid transparent', borderTopColor: '#FFFFFF', animation: 'pano-spin 1.2s linear infinite' }} />
+              <div style={{ position: 'absolute', inset: 4, borderRadius: '50%', border: '2px solid transparent', borderTopColor: 'rgba(255, 255, 255,0.3)', animation: 'pano-spin 1.8s linear infinite reverse' }} />
             </div>
             <div style={{ display: 'flex', gap: 6 }}>
               {[0,1,2].map(i => (
-                <div key={i} style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#E8D9B0', animation: `pano-pulse 1.4s ease-in-out ${i*0.2}s infinite` }} />
+                <div key={i} style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#FFFFFF', animation: `pano-pulse 1.4s ease-in-out ${i*0.2}s infinite` }} />
               ))}
             </div>
             <style>{`

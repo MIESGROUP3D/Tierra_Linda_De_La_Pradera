@@ -15,11 +15,11 @@ const inter = Inter({
 // build PORTABLE (rutas relativas para cualquier subcarpeta).
 
 export const metadata: Metadata = {
-  title: "VALLE ALTO | Recorrido Virtual 360°",
+  title: "TIERRA LINDA DE LA PRADERA | Recorrido Virtual 360°",
   description:
-    "Explore cada espacio de Valle Alto — Constructora Meléndez con tecnología panorámica interactiva 360°.",
+    "Explore cada espacio de Tierra Linda de la Pradera — Constructora Meléndez con tecnología panorámica interactiva 360°.",
   keywords: [
-    "Valle Alto",
+    "Tierra Linda de la Pradera",
     "Constructora Meléndez",
     "recorrido 360",
     "tour virtual",
@@ -36,24 +36,24 @@ export const metadata: Metadata = {
     apple: [{ url: assetPath(`/apple-icon.png`), sizes: "180x180" }],
   },
   openGraph: {
-    title: "VALLE ALTO | Recorrido Virtual 360°",
+    title: "TIERRA LINDA DE LA PRADERA | Recorrido Virtual 360°",
     description:
-      "Explore cada espacio de Valle Alto — Constructora Meléndez con tecnología panorámica interactiva 360°.",
+      "Explore cada espacio de Tierra Linda de la Pradera — Constructora Meléndez con tecnología panorámica interactiva 360°.",
     type: "website",
     images: [
       {
-        url: assetPath(`/building-mobile.jpg`),
-        width: 1600,
-        height: 900,
-        alt: "Valle Alto — Constructora Meléndez",
+        url: assetPath(`/og-image.jpg`),
+        width: 1200,
+        height: 630,
+        alt: "Tierra Linda de la Pradera — Constructora Meléndez",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "VALLE ALTO | Recorrido Virtual 360°",
-    description: "Explore cada espacio de Valle Alto con tecnología panorámica interactiva 360°.",
-    images: [assetPath(`/building-mobile.jpg`)],
+    title: "TIERRA LINDA DE LA PRADERA | Recorrido Virtual 360°",
+    description: "Explore cada espacio de Tierra Linda de la Pradera con tecnología panorámica interactiva 360°.",
+    images: [assetPath(`/og-image.jpg`)],
   },
 };
 

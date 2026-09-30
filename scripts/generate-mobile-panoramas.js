@@ -23,6 +23,7 @@ const SOURCE_DIRS = [
   'public/projects/melendez/valle-alto/panoramas/tipo-a',
   'public/projects/melendez/valle-alto/panoramas/tipo-b',
   'public/projects/melendez/valle-alto/images/exterior',
+  'public/projects/melendez/tierra-linda-de-la-pradera/panoramas/tipo-g',
 ];
 
 async function processDir(relDir) {

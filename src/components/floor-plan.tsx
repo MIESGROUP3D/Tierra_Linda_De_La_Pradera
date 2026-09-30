@@ -94,7 +94,7 @@ export default function FloorPlan() {
     setRadarOffsets({});
   }, []);
 
-  const primary = '#E8D9B0';
+  const primary = '#FFFFFF';
 
   const currentScene = selectedApartment?.scenes?.find((s) => s.id === currentSceneId);
   const currentSceneName = currentScene?.name ?? '';
@@ -251,7 +251,7 @@ export default function FloorPlan() {
         className="fixed z-[9999] flex flex-col items-center justify-end overflow-hidden rounded-2xl border shadow-2xl backdrop-blur-xl transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]"
         style={{
           background: 'rgba(10, 10, 10, 0.78)',
-          borderColor: 'rgba(232,217,176,0.2)',
+          borderColor: 'rgba(255, 255, 255,0.2)',
           ...(expanded
             ? {
                 bottom: 24,
@@ -281,9 +281,9 @@ export default function FloorPlan() {
         {/* Header bar */}
         <div className="flex w-full items-center justify-between mb-2">
           <div className="flex items-center gap-1.5">
-            <MapPin size={expanded ? 16 : 13} className="text-[#E8D9B0]/70" />
+            <MapPin size={expanded ? 16 : 13} className="text-[#FFFFFF]/70" />
             <span
-              className="font-semibold tracking-wide text-[#E8D9B0]/80 select-none"
+              className="font-semibold tracking-wide text-[#FFFFFF]/80 select-none"
               style={{ fontSize: expanded ? 13 : 11 }}
             >
               Floor Plan
@@ -305,7 +305,7 @@ export default function FloorPlan() {
             {/* Close button */}
             <button
               onClick={toggleFloorPlan}
-              className="flex items-center justify-center rounded-lg p-1.5 text-white/60 transition-colors hover:bg-[rgba(232,217,176,0.1)] hover:text-white/90"
+              className="flex items-center justify-center rounded-lg p-1.5 text-white/60 transition-colors hover:bg-[rgba(255, 255, 255,0.1)] hover:text-white/90"
               aria-label="Close floor plan"
             >
               <svg
@@ -324,7 +324,7 @@ export default function FloorPlan() {
             {/* Expand / Collapse */}
             <button
               onClick={toggleExpand}
-              className="flex items-center justify-center rounded-lg p-1.5 text-white/60 transition-colors hover:bg-[rgba(232,217,176,0.1)] hover:text-white/90"
+              className="flex items-center justify-center rounded-lg p-1.5 text-white/60 transition-colors hover:bg-[rgba(255, 255, 255,0.1)] hover:text-white/90"
               aria-label={expanded ? 'Collapse floor plan' : 'Expand floor plan'}
             >
               {expanded ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
@@ -448,12 +448,12 @@ export default function FloorPlan() {
                       {/* RADAR (solo escena actual) — debajo de la burbuja */}
                       {isCurrent && (
                         <>
-                          {/* Anillo de ping cyan (no rota) */}
+                          {/* Anillo de ping rojo (no rota) */}
                           <circle
                             cx={dot.cx}
                             cy={dot.cy}
                             fill="none"
-                            stroke="#5DD5F0"
+                            stroke="#E3000F"
                             strokeWidth={expanded ? 2.5 : 2}
                             opacity={0.7}
                             className="fp-radar-ping pointer-events-none"
@@ -465,8 +465,8 @@ export default function FloorPlan() {
                           >
                             <path
                               d={`M ${dot.cx} ${dot.cy} L ${lx} ${ly} A ${coneR} ${coneR} 0 0 1 ${rx2} ${ry2} Z`}
-                              fill="rgba(93,213,240,0.35)"
-                              stroke="#5DD5F0"
+                              fill="rgba(227,0,15,0.35)"
+                              stroke="#E3000F"
                               strokeWidth={expanded ? 2 : 1.5}
                               strokeLinejoin="round"
                               filter="url(#fp-shadow)"
@@ -496,12 +496,12 @@ export default function FloorPlan() {
                         filter="url(#fp-shadow)"
                         className="transition-all duration-300"
                       />
-                      {/* Cuerpo cyan */}
+                      {/* Cuerpo rojo */}
                       <circle
                         cx={dot.cx}
                         cy={dot.cy}
                         r={isCurrent ? bubbleR : bubbleR - 1}
-                        fill="#5DD5F0"
+                        fill="#E3000F"
                         stroke="#FFFFFF"
                         strokeWidth={isCurrent ? 2 : 1.5}
                         className={isCurrent ? '' : 'fp-bubble-pulse transition-all duration-300'}
@@ -611,8 +611,8 @@ export default function FloorPlan() {
                         height={rh}
                         rx={radius}
                         ry={radius}
-                        fill={isCurrent ? primary : (room.fill ?? 'rgba(232,217,176,0.08)')}
-                        stroke={isCurrent ? primary : (room.stroke ?? 'rgba(232,217,176,0.18)')}
+                        fill={isCurrent ? primary : (room.fill ?? 'rgba(255, 255, 255,0.08)')}
+                        stroke={isCurrent ? primary : (room.stroke ?? 'rgba(255, 255, 255,0.18)')}
                         strokeWidth={isCurrent ? 2 : 1}
                         filter={isCurrent ? 'url(#fp-glow)' : undefined}
                         className="transition-all duration-300"
@@ -626,7 +626,7 @@ export default function FloorPlan() {
                         height={rh}
                         rx={radius}
                         ry={radius}
-                        fill="rgba(232,217,176,0.06)"
+                        fill="rgba(255, 255, 255,0.06)"
                         className="opacity-0 hover:opacity-100 transition-opacity duration-200 pointer-events-none"
                       />
                       {/* Label text */}
@@ -635,7 +635,7 @@ export default function FloorPlan() {
                         y={isCurrent ? ry + fontSize * 1.4 : center.cy}
                         textAnchor="middle"
                         dominantBaseline="central"
-                        fill={isCurrent ? '#E8D9B0' : 'rgba(232,217,176,0.6)'}
+                        fill={isCurrent ? '#FFFFFF' : 'rgba(255, 255, 255,0.6)'}
                         fontSize={fontSize}
                         fontWeight={isCurrent ? 700 : 500}
                         className="pointer-events-none select-none"
@@ -660,8 +660,8 @@ export default function FloorPlan() {
                           >
                             <path
                               d={`M ${center.cx} ${center.cy} L ${lx} ${ly} A ${coneR} ${coneR} 0 0 1 ${rx2} ${ry2} Z`}
-                              fill="rgba(40,32,26,0.28)"
-                              stroke="rgba(40,32,26,0.65)"
+                              fill="rgba(40, 40, 40,0.28)"
+                              stroke="rgba(40, 40, 40,0.65)"
                               strokeWidth={expanded ? 1.2 : 1}
                               strokeLinejoin="round"
                             />
@@ -669,13 +669,13 @@ export default function FloorPlan() {
                               cx={center.cx}
                               cy={center.cy - coneR}
                               r={expanded ? 2.5 : 1.8}
-                              fill="rgba(40,32,26,0.8)"
+                              fill="rgba(40, 40, 40,0.8)"
                             />
                             <circle
                               cx={center.cx}
                               cy={center.cy}
                               fill="none"
-                              stroke="rgba(40,32,26,0.5)"
+                              stroke="rgba(40, 40, 40,0.5)"
                               strokeWidth={1.2}
                               className="fp-radar-ping"
                             />
@@ -683,7 +683,7 @@ export default function FloorPlan() {
                               cx={center.cx}
                               cy={center.cy}
                               r={expanded ? 4 : 3}
-                              fill="rgba(40,32,26,0.85)"
+                              fill="rgba(40, 40, 40,0.85)"
                             />
                           </g>
                         );
@@ -706,14 +706,14 @@ export default function FloorPlan() {
               padding: '8px 10px',
               fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
               fontSize: 11,
-              color: '#E8D9B0',
+              color: '#FFFFFF',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
               <span style={{ color: '#5DD5F0', fontWeight: 700, letterSpacing: 1, fontSize: 10 }}>
                 ARRASTRA BURBUJAS · {Object.keys(debugOverrides).length} ed · RADAR [ ] AJUSTA
                 {currentScene && (
-                  <span style={{ color: '#E8D9B0', fontWeight: 400, marginLeft: 6 }}>
+                  <span style={{ color: '#FFFFFF', fontWeight: 400, marginLeft: 6 }}>
                     · {currentSceneName} radarYawOffset{' '}
                     <b style={{ color: '#5DD5F0' }}>
                       {radarOffsets[currentSceneId] ?? (rooms.find((r) => r.sceneId === currentSceneId)?.radarYawOffset ?? 0)}°
@@ -726,8 +726,8 @@ export default function FloorPlan() {
                   onClick={debugReset}
                   style={{
                     padding: '3px 9px', fontSize: 10, borderRadius: 4, cursor: 'pointer',
-                    background: 'rgba(255,255,255,0.06)', color: 'rgba(232,217,176,0.8)',
-                    border: '1px solid rgba(232,217,176,0.25)', fontFamily: 'inherit',
+                    background: 'rgba(255,255,255,0.06)', color: 'rgba(255, 255, 255,0.8)',
+                    border: '1px solid rgba(255, 255, 255,0.25)', fontFamily: 'inherit',
                   }}
                 >
                   reset
@@ -761,7 +761,7 @@ export default function FloorPlan() {
                     <span style={{ opacity: 0.85, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {room.label}
                     </span>
-                    <span style={{ color: edited ? '#5DD5F0' : 'rgba(232,217,176,0.65)', fontWeight: edited ? 700 : 400, whiteSpace: 'nowrap' }}>
+                    <span style={{ color: edited ? '#5DD5F0' : 'rgba(255, 255, 255,0.65)', fontWeight: edited ? 700 : 400, whiteSpace: 'nowrap' }}>
                       {d.dotX},{d.dotY}
                     </span>
                   </div>

@@ -76,7 +76,7 @@ export default function MediaGallery() {
         className="mg-backdrop fixed inset-0 z-[10000] flex flex-col"
         style={{
           background:
-            'radial-gradient(ellipse at center, rgba(10,8,6,0.93) 0%, rgba(0,0,0,0.97) 100%)',
+            'radial-gradient(ellipse at center, rgba(10, 10, 10,0.93) 0%, rgba(0,0,0,0.97) 100%)',
           backdropFilter: 'blur(8px)',
           WebkitBackdropFilter: 'blur(8px)',
         }}
@@ -85,21 +85,21 @@ export default function MediaGallery() {
         {/* Header */}
         <div
           className="flex items-center justify-between px-6 py-4"
-          style={{ borderBottom: '1px solid rgba(232,217,176,0.08)' }}
+          style={{ borderBottom: '1px solid rgba(255, 255, 255,0.08)' }}
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-center gap-3">
-            <IconHeader size={18} className="text-[#E8D9B0]/70" />
+            <IconHeader size={18} className="text-[#FFFFFF]/70" />
             <h2
               className="font-semibold tracking-wide uppercase select-none"
-              style={{ color: '#E8D9B0', fontSize: 14, letterSpacing: 2 }}
+              style={{ color: '#FFFFFF', fontSize: 14, letterSpacing: 2 }}
             >
               {title}
             </h2>
             {total > 0 && (
               <span
                 className="ml-2 text-[11px] tracking-wider select-none"
-                style={{ color: 'rgba(232,217,176,0.45)' }}
+                style={{ color: 'rgba(255, 255, 255,0.45)' }}
               >
                 {index + 1} / {total}
               </span>
@@ -110,19 +110,19 @@ export default function MediaGallery() {
             aria-label="Cerrar"
             className="flex items-center justify-center rounded-lg p-2 transition-colors"
             style={{
-              color: 'rgba(232,217,176,0.7)',
-              background: 'rgba(232,217,176,0.06)',
-              border: '1px solid rgba(232,217,176,0.12)',
+              color: 'rgba(255, 255, 255,0.7)',
+              background: 'rgba(255, 255, 255,0.06)',
+              border: '1px solid rgba(255, 255, 255,0.12)',
             }}
             onMouseEnter={(e) => {
               (e.currentTarget as HTMLButtonElement).style.background =
-                'rgba(232,217,176,0.12)';
-              (e.currentTarget as HTMLButtonElement).style.color = '#E8D9B0';
+                'rgba(255, 255, 255,0.12)';
+              (e.currentTarget as HTMLButtonElement).style.color = '#FFFFFF';
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLButtonElement).style.background =
-                'rgba(232,217,176,0.06)';
-              (e.currentTarget as HTMLButtonElement).style.color = 'rgba(232,217,176,0.7)';
+                'rgba(255, 255, 255,0.06)';
+              (e.currentTarget as HTMLButtonElement).style.color = 'rgba(255, 255, 255,0.7)';
             }}
           >
             <X size={16} />
@@ -138,11 +138,11 @@ export default function MediaGallery() {
             <div className="text-center select-none">
               <p
                 className="text-[13px] tracking-wider uppercase mb-2"
-                style={{ color: 'rgba(232,217,176,0.5)', letterSpacing: 2 }}
+                style={{ color: 'rgba(255, 255, 255,0.5)', letterSpacing: 2 }}
               >
                 Próximamente
               </p>
-              <p className="text-[12px]" style={{ color: 'rgba(232,217,176,0.35)' }}>
+              <p className="text-[12px]" style={{ color: 'rgba(255, 255, 255,0.35)' }}>
                 {galleryOpen === 'gallery'
                   ? 'Los renders del proyecto se agregarán aquí.'
                   : 'Las plantas del proyecto se agregarán aquí.'}
@@ -159,19 +159,19 @@ export default function MediaGallery() {
                   style={{
                     width: 52,
                     height: 52,
-                    background: 'rgba(10,8,6,0.7)',
-                    border: '1px solid rgba(232,217,176,0.25)',
-                    color: '#E8D9B0',
+                    background: 'rgba(10, 10, 10,0.7)',
+                    border: '1px solid rgba(255, 255, 255,0.25)',
+                    color: '#FFFFFF',
                     backdropFilter: 'blur(8px)',
                   }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLButtonElement).style.background =
-                      'rgba(232,217,176,0.18)';
+                      'rgba(255, 255, 255,0.18)';
                     (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1.06)';
                   }}
                   onMouseLeave={(e) => {
                     (e.currentTarget as HTMLButtonElement).style.background =
-                      'rgba(10,8,6,0.7)';
+                      'rgba(10, 10, 10,0.7)';
                     (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1)';
                   }}
                 >
@@ -188,19 +188,19 @@ export default function MediaGallery() {
                   style={{
                     width: 52,
                     height: 52,
-                    background: 'rgba(10,8,6,0.7)',
-                    border: '1px solid rgba(232,217,176,0.25)',
-                    color: '#E8D9B0',
+                    background: 'rgba(10, 10, 10,0.7)',
+                    border: '1px solid rgba(255, 255, 255,0.25)',
+                    color: '#FFFFFF',
                     backdropFilter: 'blur(8px)',
                   }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLButtonElement).style.background =
-                      'rgba(232,217,176,0.18)';
+                      'rgba(255, 255, 255,0.18)';
                     (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1.06)';
                   }}
                   onMouseLeave={(e) => {
                     (e.currentTarget as HTMLButtonElement).style.background =
-                      'rgba(10,8,6,0.7)';
+                      'rgba(10, 10, 10,0.7)';
                     (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1)';
                   }}
                 >
@@ -241,7 +241,7 @@ export default function MediaGallery() {
                     {current.title && (
                       <p
                         className="text-[13px] font-semibold tracking-wide"
-                        style={{ color: '#E8D9B0' }}
+                        style={{ color: '#FFFFFF' }}
                       >
                         {current.title}
                       </p>
@@ -249,7 +249,7 @@ export default function MediaGallery() {
                     {current.caption && (
                       <p
                         className="text-[11px] mt-1"
-                        style={{ color: 'rgba(232,217,176,0.55)' }}
+                        style={{ color: 'rgba(255, 255, 255,0.55)' }}
                       >
                         {current.caption}
                       </p>
@@ -279,7 +279,7 @@ export default function MediaGallery() {
                   width: i === index ? 28 : 8,
                   height: 8,
                   borderRadius: 4,
-                  background: i === index ? '#E8D9B0' : 'rgba(232,217,176,0.3)',
+                  background: i === index ? '#FFFFFF' : 'rgba(255, 255, 255,0.3)',
                   transition: 'all 0.25s ease',
                   border: 'none',
                   cursor: 'pointer',

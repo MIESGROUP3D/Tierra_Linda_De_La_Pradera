@@ -27,7 +27,7 @@ function isApartmentAvailable(apt: ApartmentConfig): boolean {
   });
 }
 
-const BEIGE = '#E8D9B0';
+const BEIGE = '#FFFFFF';
 
 export default function BuildingSelector() {
   const { config, setApartment, setApartmentAtScene } = useTourStore();
@@ -106,7 +106,7 @@ export default function BuildingSelector() {
             fetchPriority="high"
           />
         </picture>
-        <div className="absolute inset-0 bg-black/35" />
+        <div className="absolute inset-0 bg-black/15" />
       </div>
 
       {/* ── Top header ── (pointer-events-none: no debe tapar los ojos) */}
@@ -250,7 +250,7 @@ function BuildingHotspot({
   /* ── Dirección de despliegue de la card (config: apt.cardDir) ──
      'up' (def) · 'down' · 'left' · 'right'. Calcula posición, animación de
      entrada y el triángulo conector hacia el hotspot. */
-  const cardBg = 'rgba(10,14,12,0.88)';
+  const cardBg = 'rgba(10, 10, 10,0.88)';
   const GAP = 18;
   const dir = apt.cardDir ?? 'up';
   let cardPos: React.CSSProperties;
@@ -308,7 +308,7 @@ function BuildingHotspot({
         <div
           className="rounded-2xl border p-4 backdrop-blur-xl"
           style={{
-            background: 'rgba(10,14,12,0.88)',
+            background: 'rgba(10, 10, 10,0.88)',
             borderColor: `${BEIGE}30`,
             boxShadow: `0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px ${BEIGE}10`,
           }}
@@ -328,7 +328,7 @@ function BuildingHotspot({
             <div className="flex items-center gap-3 mb-4 text-[11px]" style={{ color: `${BEIGE}80` }}>
               <span className="flex items-center gap-1"><Bed size={12} /> {apt.bedrooms}</span>
               <span className="flex items-center gap-1"><Bath size={12} /> {apt.bathrooms}</span>
-              <span className="flex items-center gap-1"><Maximize2 size={12} /> {apt.area}m²</span>
+              <span className="flex items-center gap-1"><Maximize2 size={12} /> {apt.area.toLocaleString('es-CO')}m²</span>
             </div>
           )}
 
@@ -400,8 +400,8 @@ function BuildingHotspot({
           style={{
             background: available
               ? (isHovered
-                  ? 'radial-gradient(circle, rgba(48,41,34,0.92) 0%, rgba(30,26,22,0.65) 70%, rgba(30,26,22,0.25) 100%)'
-                  : 'radial-gradient(circle, rgba(34,29,24,0.80) 0%, rgba(25,21,18,0.50) 70%, rgba(25,21,18,0.15) 100%)')
+                  ? 'radial-gradient(circle, rgba(51, 51, 51,0.92) 0%, rgba(30, 30, 30,0.65) 70%, rgba(30, 30, 30,0.25) 100%)'
+                  : 'radial-gradient(circle, rgba(34, 34, 34,0.80) 0%, rgba(26, 26, 26,0.50) 70%, rgba(26, 26, 26,0.15) 100%)')
               : 'rgba(255,255,255,0.12)',
             backdropFilter: 'blur(7px)',
             WebkitBackdropFilter: 'blur(7px)',

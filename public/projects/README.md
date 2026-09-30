@@ -42,7 +42,8 @@ public/projects/
 
 | Constructora          | Proyecto    | Carpeta                 | Estado      |
 |-----------------------|-------------|-------------------------|-------------|
-| Constructora Melendez | Valle Alto  | melendez/valle-alto/    | Activo      |
+| Constructora Melendez | Valle Alto  | melendez/valle-alto/    | Referencia  |
+| Constructora Melendez | Tierra Linda de la Pradera | melendez/tierra-linda-de-la-pradera/ | Activo |
 
 ---
 

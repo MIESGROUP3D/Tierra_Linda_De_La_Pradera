@@ -30,7 +30,7 @@ export default function TourWelcome({ onStart }: Props) {
       >
         <h1
           className="text-3xl font-extrabold tracking-tight mb-2"
-          style={{ color: '#E8D9B0', animation: 'welcome-fade-up 0.6s ease 0.3s both' }}
+          style={{ color: '#FFFFFF', animation: 'welcome-fade-up 0.6s ease 0.3s both' }}
         >
           {selectedApartment?.name ?? ''}
         </h1>
@@ -43,7 +43,7 @@ export default function TourWelcome({ onStart }: Props) {
         <button
           onClick={e => { e.stopPropagation(); onStart(); }}
           className="group relative px-10 py-3.5 rounded-2xl text-base font-semibold text-black transition-all duration-300 hover:scale-105 active:scale-95 inline-flex items-center gap-3 cursor-pointer"
-          style={{ background: '#E8D9B0', animation: 'welcome-fade-up 0.6s ease 0.5s both' }}
+          style={{ background: '#FFFFFF', animation: 'welcome-fade-up 0.6s ease 0.5s both' }}
         >
           <Eye size={20} />
           Iniciar Recorrido 360°

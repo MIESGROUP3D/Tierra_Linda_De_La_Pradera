@@ -8,9 +8,11 @@
  *  Funciones:
  *    • Crosshair fijo con yaw/pitch/hfov en vivo
  *    • Salto rapido entre apartamentos y escenas (no toca el sidebar)
- *    • Lista de hotspots actuales con highlight si tu mira esta cerca
- *    • "Agregar hotspot aqui"  → crea uno en RAM con yaw/pitch del crosshair
+ *    • Spots ARRASTRABLES en el panorama: al soltarlos se guarda su vista y
+ *      pitch/yaw (localStorage, ver lib/debug-edits-store.ts)
+ *    • "Agregar spot en el crosshair" → spot nuevo, arrastrable, con destino
  *    • "Fijar variantButton aqui" → marca posicion del boton de variante
+ *    • "Copiar cambios" → snippet de TODAS las vistas editadas
  *    • Validacion de conexiones (hotspots a escenas inexistentes, falta
  *      de reciprocidad A↔B, escenas huerfanas sin entrada)
  *    • Export de la escena actual como snippet TS listo para pegar
@@ -19,7 +21,14 @@
  *  ───────────────────────────────────────────────────────────────── */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { useTourStore } from '@/lib/tour-store';
+import {
+  useDebugEdits,
+  effectiveHotspots,
+  effectiveVariantButton,
+  sceneHasEdits,
+} from '@/lib/debug-edits-store';
 import type { HotspotConfig, SceneConfig, ApartmentConfig, PlaybackAnimation } from '@/lib/tour-types';
 import {
   PAN_SPEED,
@@ -37,7 +46,7 @@ type BtnTone = 'cyan' | 'ghost' | 'green' | 'warn' | 'danger';
 function btn(tone: BtnTone, extra?: React.CSSProperties): React.CSSProperties {
   const tones: Record<BtnTone, { bg: string; bd: string; fg: string }> = {
     cyan: { bg: 'rgba(93,213,240,0.16)', bd: 'rgba(93,213,240,0.5)', fg: CYAN },
-    ghost: { bg: 'rgba(255,255,255,0.05)', bd: 'rgba(232,217,176,0.3)', fg: '#E8D9B0' },
+    ghost: { bg: 'rgba(255,255,255,0.05)', bd: 'rgba(255, 255, 255,0.3)', fg: '#FFFFFF' },
     green: { bg: 'rgba(80,200,120,0.16)', bd: 'rgba(80,200,120,0.5)', fg: '#80E090' },
     warn: { bg: 'rgba(255,180,80,0.14)', bd: 'rgba(255,180,80,0.45)', fg: '#FFC080' },
     danger: { bg: 'rgba(255,80,80,0.14)', bd: 'rgba(255,80,80,0.45)', fg: '#FF8888' },
@@ -79,13 +88,35 @@ interface DebugPanelProps {
 
 type Tab = 'hotspots' | 'variants' | 'playback' | 'plan' | 'export' | 'check';
 
-interface DraftHotspot {
-  id: string;
-  label: string;
-  pitch: number;
-  yaw: number;
-  type: HotspotConfig['type'];
-  targetSceneId?: string;
+/** Prefijo comun de dos ids hasta el ultimo '-' (tl-tg-cocina / tl-tg-balcon → 'tl-tg-'). */
+function commonIdPrefix(a: string, b: string): string {
+  let i = 0;
+  while (i < a.length && i < b.length && a[i] === b[i]) i++;
+  const cut = a.slice(0, i).lastIndexOf('-');
+  return cut >= 0 ? a.slice(0, cut + 1) : '';
+}
+
+/** Id legible para un spot nuevo: tl-tg-cocina + tl-tg-balcon → tl-tg-cocina-to-balcon */
+function spotIdFor(sceneId: string, targetId: string, taken: Set<string>): string {
+  const prefix = commonIdPrefix(sceneId, targetId);
+  const base = `${sceneId}-to-${targetId.slice(prefix.length)}`;
+  let id = base;
+  for (let n = 2; taken.has(id); n++) id = `${base}-${n}`;
+  return id;
+}
+
+function hotspotSnippet(h: HotspotConfig, indent: string): string {
+  const q = (s: string) => s.replace(/'/g, "\\'");
+  return [
+    `${indent}{`,
+    `${indent}  id: '${q(h.id)}',`,
+    `${indent}  pitch: ${h.pitch}, yaw: ${h.yaw},`,
+    `${indent}  type: '${h.type}',`,
+    `${indent}  label: '${q(h.label)}',`,
+    ...(h.description ? [`${indent}  description: '${q(h.description)}',`] : []),
+    ...(h.targetSceneId ? [`${indent}  targetSceneId: '${h.targetSceneId}',`] : []),
+    `${indent}},`,
+  ].join('\n');
 }
 
 export default function DebugPanel({ viewerHandle }: DebugPanelProps) {
@@ -105,6 +136,30 @@ export default function DebugPanel({ viewerHandle }: DebugPanelProps) {
   );
   const currentScene: SceneConfig | undefined = selectedApartment?.scenes.find(
     (s) => s.id === currentSceneId,
+  );
+
+  /* ── Ediciones guardadas (spots arrastrados / nuevos / borrados) ── */
+  const edits = useDebugEdits(
+    useShallow((s) => ({ moved: s.moved, added: s.added, removed: s.removed, variantBtn: s.variantBtn })),
+  );
+  const debugActions = useDebugEdits(
+    useShallow((s) => ({
+      addHotspot: s.addHotspot,
+      updateAdded: s.updateAdded,
+      removeHotspot: s.removeHotspot,
+      moveVariantButton: s.moveVariantButton,
+      clearScene: s.clearScene,
+      clearAll: s.clearAll,
+      bump: s.bump,
+    })),
+  );
+  const spots = useMemo(
+    () => (currentScene ? effectiveHotspots(currentScene, edits) : []),
+    [currentScene, edits],
+  );
+  const editedScenes = useMemo(
+    () => (selectedApartment?.scenes ?? []).filter((s) => sceneHasEdits(s, edits)),
+    [selectedApartment, edits],
   );
 
   /* ── Live coords del viewer ─────────────────────────────────── */
@@ -133,12 +188,6 @@ export default function DebugPanel({ viewerHandle }: DebugPanelProps) {
   const [tab, setTab] = useState<Tab>('hotspots');
   const [copied, setCopied] = useState<string | null>(null);
 
-  // Drafts en memoria — el usuario los agrega aqui, luego los exporta para pegar en config
-  const [drafts, setDrafts] = useState<DraftHotspot[]>([]);
-  const [draftVariantBtn, setDraftVariantBtn] = useState<{ pitch: number; yaw: number } | null>(
-    null,
-  );
-
   // Keyframes de reproducción por escena (persisten al cambiar de escena para
   // poder construir las animaciones sin perder trabajo). Clave = sceneId.
   const [playbackDrafts, setPlaybackDrafts] = useState<Record<string, PlaybackAnimation[]>>({});
@@ -155,11 +204,9 @@ export default function DebugPanel({ viewerHandle }: DebugPanelProps) {
     hfov: config.playback?.hfov ?? PLAYBACK_HFOV,
   }));
 
-  // Reset drafts (hotspots/variante) al cambiar de escena. Los playbackDrafts NO
-  // se borran (son acumulativos por escena); solo limpiamos el FROM pendiente.
+  // Al cambiar de escena solo se limpia el FROM pendiente. Los spots editados y
+  // los playbackDrafts se conservan por escena.
   useEffect(() => {
-    setDrafts([]);
-    setDraftVariantBtn(null);
     setPendingFrom(null);
     previewRef.current = false;
     setPreviewing(false);
@@ -193,34 +240,44 @@ export default function DebugPanel({ viewerHandle }: DebugPanelProps) {
   }, []);
 
   /* ── Acciones ───────────────────────────────────────────────── */
-  const addDraftHotspot = useCallback(() => {
-    if (!coords) return;
-    const idx = drafts.length + 1;
-    setDrafts((prev) => [
-      ...prev,
-      {
-        id: `new-hotspot-${Date.now().toString(36)}`,
-        label: `Nuevo ${idx}`,
-        pitch: coords.pitch,
-        yaw: coords.yaw,
-        type: 'scene',
-        targetSceneId: '',
-      },
-    ]);
-  }, [coords, drafts.length]);
+  // Spot nuevo en el crosshair; queda en el panorama para arrastrarlo
+  const addSpotHere = useCallback(() => {
+    if (!coords || !currentSceneId) return;
+    const n = (edits.added[currentSceneId] ?? []).length + 1;
+    debugActions.addHotspot(currentSceneId, {
+      id: `${currentSceneId}-nuevo-${Date.now().toString(36)}`,
+      label: `Nuevo ${n}`,
+      pitch: coords.pitch,
+      yaw: coords.yaw,
+      type: 'scene',
+      targetSceneId: '',
+    });
+  }, [coords, currentSceneId, edits.added, debugActions]);
 
-  const updateDraft = useCallback((id: string, patch: Partial<DraftHotspot>) => {
-    setDrafts((prev) => prev.map((d) => (d.id === id ? { ...d, ...patch } : d)));
-  }, []);
-
-  const removeDraft = useCallback((id: string) => {
-    setDrafts((prev) => prev.filter((d) => d.id !== id));
-  }, []);
+  // Al elegir destino: id y label salen de la escena destino
+  const setSpotTarget = useCallback(
+    (spotId: string, targetId: string) => {
+      const target = selectedApartment?.scenes.find((s) => s.id === targetId);
+      const taken = new Set(spots.filter((h) => h.id !== spotId).map((h) => h.id));
+      debugActions.updateAdded(currentSceneId, spotId, {
+        targetSceneId: targetId,
+        ...(target
+          ? {
+              id: spotIdFor(currentSceneId, targetId, taken),
+              label: target.name,
+              description: `Ir a ${target.name.toLowerCase()}`,
+            }
+          : {}),
+      });
+    },
+    [selectedApartment, spots, currentSceneId, debugActions],
+  );
 
   const setVariantBtnHere = useCallback(() => {
     if (!coords) return;
-    setDraftVariantBtn({ pitch: coords.pitch, yaw: coords.yaw });
-  }, [coords]);
+    debugActions.moveVariantButton(currentSceneId, { pitch: coords.pitch, yaw: coords.yaw });
+    debugActions.bump();
+  }, [coords, currentSceneId, debugActions]);
 
   /* ── Playback: captura de keyframes ─────────────────────────── */
   const pbAnims = playbackDrafts[currentSceneId] ?? [];
@@ -251,7 +308,7 @@ export default function DebugPanel({ viewerHandle }: DebugPanelProps) {
 
   const genFromExits = useCallback(() => {
     if (!currentScene) return;
-    const hs = currentScene.hotspots ?? [];
+    const hs = spots;
     if (!hs.length) return;
     const r1 = (n: number) => Math.round(n * 10) / 10;
     const sorted = [...hs].sort((a, b) => a.yaw - b.yaw);
@@ -260,7 +317,7 @@ export default function DebugPanel({ viewerHandle }: DebugPanelProps) {
       to: { pitch: r1(h.pitch), yaw: r1(h.yaw) },
     }));
     setPlaybackDrafts((prev) => ({ ...prev, [currentSceneId]: anims }));
-  }, [currentScene, currentSceneId]);
+  }, [currentScene, currentSceneId, spots]);
 
   const removeLastSegment = useCallback(() => {
     setPlaybackDrafts((prev) => ({
@@ -344,14 +401,15 @@ export default function DebugPanel({ viewerHandle }: DebugPanelProps) {
       .join('\n\n');
   }, [playbackDrafts, selectedApartment]);
 
-  /* ── Validacion de conexiones ──────────────────────────────── */
+  /* ── Validacion de conexiones (con las ediciones de debug aplicadas) ── */
   const validation = useMemo(() => {
     if (!selectedApartment) return null;
-    const sceneIds = new Set(selectedApartment.scenes.map((s) => s.id));
+    const scenes = selectedApartment.scenes.map((s) => ({ ...s, hotspots: effectiveHotspots(s, edits) }));
+    const sceneIds = new Set(scenes.map((s) => s.id));
     const issues: { kind: 'broken' | 'missing-reciprocal' | 'orphan'; msg: string }[] = [];
 
     // Hotspots que apuntan a escenas inexistentes
-    selectedApartment.scenes.forEach((s) => {
+    scenes.forEach((s) => {
       s.hotspots.forEach((h) => {
         if (h.type === 'scene' && h.targetSceneId && !sceneIds.has(h.targetSceneId)) {
           issues.push({
@@ -363,10 +421,10 @@ export default function DebugPanel({ viewerHandle }: DebugPanelProps) {
     });
 
     // Reciprocidad: si A tiene hotspot a B, ¿B tiene hotspot a A?
-    selectedApartment.scenes.forEach((s) => {
+    scenes.forEach((s) => {
       s.hotspots.forEach((h) => {
         if (h.type !== 'scene' || !h.targetSceneId) return;
-        const target = selectedApartment.scenes.find((x) => x.id === h.targetSceneId);
+        const target = scenes.find((x) => x.id === h.targetSceneId);
         if (!target) return;
         const reciprocal = target.hotspots.some(
           (rh) => rh.type === 'scene' && rh.targetSceneId === s.id,
@@ -381,10 +439,10 @@ export default function DebugPanel({ viewerHandle }: DebugPanelProps) {
     });
 
     // Escenas huerfanas: nadie llega a ellas (excepto la primera)
-    const firstSceneId = selectedApartment.scenes[0]?.id;
-    selectedApartment.scenes.forEach((s) => {
+    const firstSceneId = scenes[0]?.id;
+    scenes.forEach((s) => {
       if (s.id === firstSceneId) return;
-      const hasInbound = selectedApartment.scenes.some((other) =>
+      const hasInbound = scenes.some((other) =>
         other.hotspots.some((h) => h.type === 'scene' && h.targetSceneId === s.id),
       );
       if (!hasInbound) {
@@ -393,7 +451,7 @@ export default function DebugPanel({ viewerHandle }: DebugPanelProps) {
     });
 
     return { issues, byKind: { broken: 0, 'missing-reciprocal': 0, orphan: 0 } };
-  }, [selectedApartment]);
+  }, [selectedApartment, edits]);
 
   if (validation) {
     validation.issues.forEach((i) => (validation.byKind[i.kind] += 1));
@@ -402,28 +460,8 @@ export default function DebugPanel({ viewerHandle }: DebugPanelProps) {
   /* ── Snippet exporters ─────────────────────────────────────── */
   const exportSceneSnippet = useCallback(() => {
     if (!currentScene) return '';
-    const allHs: { pitch: number; yaw: number; label: string; targetSceneId?: string; type: string; id: string }[] = [
-      ...currentScene.hotspots.map((h) => ({
-        id: h.id, pitch: h.pitch, yaw: h.yaw, label: h.label,
-        targetSceneId: h.targetSceneId, type: h.type,
-      })),
-      ...drafts.map((d) => ({
-        id: d.id, pitch: d.pitch, yaw: d.yaw, label: d.label,
-        targetSceneId: d.targetSceneId, type: d.type,
-      })),
-    ];
-    const hsLines = allHs
-      .map(
-        (h) => `        {
-          id: '${h.id}',
-          pitch: ${h.pitch}, yaw: ${h.yaw},
-          type: '${h.type}',
-          label: '${h.label}',
-          ${h.targetSceneId ? `targetSceneId: '${h.targetSceneId}',` : ''}
-        },`,
-      )
-      .join('\n');
-    const vb = draftVariantBtn ?? currentScene.variantButton;
+    const hsLines = spots.map(({ status: _s, ...h }) => hotspotSnippet(h, '        ')).join('\n');
+    const vb = effectiveVariantButton(currentScene, edits);
     const vbLine = vb ? `      variantButton: { pitch: ${vb.pitch}, yaw: ${vb.yaw} },\n` : '';
     return `// Escena: ${currentScene.name} (${currentScene.id})
     {
@@ -436,7 +474,25 @@ ${vbLine}      hotspots: [
 ${hsLines}
       ],
     },`;
-  }, [currentScene, drafts, draftVariantBtn]);
+  }, [currentScene, spots, edits]);
+
+  // Todas las vistas con cambios: bloque hotspots completo (y variantButton si se movio)
+  const exportEditedScenes = useCallback(() => {
+    if (!editedScenes.length) return '// (sin cambios guardados)';
+    return editedScenes
+      .map((s) => {
+        const hs = effectiveHotspots(s, edits).map(({ status: _s, ...h }) => hotspotSnippet(h, '  ')).join('\n');
+        const vb = edits.variantBtn[s.id];
+        return [
+          `// ── VISTA ${s.name.toUpperCase()} (${s.id}) ──`,
+          ...(vb ? [`variantButton: { pitch: ${vb.pitch}, yaw: ${vb.yaw} },`] : []),
+          `hotspots: [`,
+          hs,
+          `],`,
+        ].join('\n');
+      })
+      .join('\n\n');
+  }, [editedScenes, edits]);
 
   const exportFloorPlanSnippet = useCallback(() => {
     const rooms = selectedApartment?.floorPlan?.rooms ?? [];
@@ -567,13 +623,13 @@ ${lines.join('\n')}
           left: 12,
           zIndex: 200,
           background: 'rgba(0,0,0,0.9)',
-          border: '1px solid rgba(232,217,176,0.35)',
+          border: '1px solid rgba(255, 255, 255,0.35)',
           borderRadius: 10,
           minWidth: collapsed ? 200 : 360,
           maxWidth: 420,
           fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
           fontSize: 12,
-          color: '#E8D9B0',
+          color: '#FFFFFF',
           backdropFilter: 'blur(8px)',
           WebkitBackdropFilter: 'blur(8px)',
           boxShadow: '0 4px 20px rgba(0,0,0,0.6)',
@@ -587,7 +643,7 @@ ${lines.join('\n')}
             alignItems: 'center',
             gap: 6,
             padding: '8px 10px',
-            borderBottom: collapsed ? 'none' : '1px solid rgba(232,217,176,0.18)',
+            borderBottom: collapsed ? 'none' : '1px solid rgba(255, 255, 255,0.18)',
           }}
         >
           <button
@@ -621,8 +677,8 @@ ${lines.join('\n')}
                 style={{
                   flex: 0,
                   background: 'rgba(255,255,255,0.05)',
-                  color: '#E8D9B0',
-                  border: '1px solid rgba(232,217,176,0.25)',
+                  color: '#FFFFFF',
+                  border: '1px solid rgba(255, 255, 255,0.25)',
                   borderRadius: 4,
                   padding: '3px 4px',
                   fontSize: 10,
@@ -645,8 +701,8 @@ ${lines.join('\n')}
                 style={{
                   flex: 1,
                   background: 'rgba(255,255,255,0.05)',
-                  color: '#E8D9B0',
-                  border: '1px solid rgba(232,217,176,0.25)',
+                  color: '#FFFFFF',
+                  border: '1px solid rgba(255, 255, 255,0.25)',
                   borderRadius: 4,
                   padding: '3px 4px',
                   fontSize: 10,
@@ -670,12 +726,12 @@ ${lines.join('\n')}
             <div
               style={{
                 display: 'flex',
-                borderBottom: '1px solid rgba(232,217,176,0.18)',
+                borderBottom: '1px solid rgba(255, 255, 255,0.18)',
                 background: 'rgba(0,0,0,0.3)',
               }}
             >
               {[
-                { id: 'hotspots' as Tab, label: 'Hotspots', count: (currentScene?.hotspots.length ?? 0) + drafts.length },
+                { id: 'hotspots' as Tab, label: 'Hotspots', count: spots.length },
                 { id: 'variants' as Tab, label: 'Variante', count: currentScene?.variants?.length ?? 0 },
                 { id: 'playback' as Tab, label: 'Play', count: pbAnims.length },
                 { id: 'plan' as Tab, label: 'Floor', count: selectedApartment?.floorPlan?.rooms?.length ?? 0 },
@@ -691,8 +747,8 @@ ${lines.join('\n')}
                     fontSize: 10,
                     fontWeight: tab === t.id ? 700 : 500,
                     border: 'none',
-                    background: tab === t.id ? 'rgba(232,217,176,0.1)' : 'transparent',
-                    color: tab === t.id ? '#E8D9B0' : 'rgba(232,217,176,0.55)',
+                    background: tab === t.id ? 'rgba(255, 255, 255,0.1)' : 'transparent',
+                    color: tab === t.id ? '#FFFFFF' : 'rgba(255, 255, 255,0.55)',
                     cursor: 'pointer',
                     borderBottom: tab === t.id ? '2px solid #5DD5F0' : '2px solid transparent',
                     fontFamily: 'inherit',
@@ -715,7 +771,7 @@ ${lines.join('\n')}
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 padding: '8px 10px',
-                borderBottom: '1px solid rgba(232,217,176,0.18)',
+                borderBottom: '1px solid rgba(255, 255, 255,0.18)',
                 background: 'rgba(93,213,240,0.04)',
               }}
             >
@@ -752,201 +808,154 @@ ${lines.join('\n')}
             <div style={{ maxHeight: 380, overflowY: 'auto', padding: '8px 10px' }}>
               {tab === 'hotspots' && (
                 <>
-                  {/* Boton agregar */}
-                  <button
-                    onClick={addDraftHotspot}
+                  <div
                     style={{
-                      width: '100%',
-                      padding: '6px 10px',
-                      fontSize: 11,
-                      background: 'rgba(93,213,240,0.15)',
-                      border: '1px dashed rgba(93,213,240,0.5)',
-                      borderRadius: 5,
-                      color: '#5DD5F0',
-                      cursor: 'pointer',
-                      fontFamily: 'inherit',
-                      fontWeight: 700,
+                      fontSize: 10,
+                      opacity: 0.75,
+                      padding: 6,
+                      background: 'rgba(255,255,255,0.04)',
+                      borderRadius: 4,
                       marginBottom: 8,
+                      lineHeight: 1.5,
                     }}
                   >
-                    + Agregar hotspot en el crosshair
+                    <b style={{ color: CYAN }}>Arrastra los spots</b> en el panorama: al soltarlos se
+                    guarda la vista y el pitch/yaw (sobrevive a recargas). Un click sin arrastrar
+                    sigue navegando.
+                  </div>
+
+                  <button onClick={addSpotHere} style={btn('cyan', { width: '100%', border: '1px dashed rgba(93,213,240,0.5)', fontSize: 11, marginBottom: 8 })}>
+                    + Agregar spot en el crosshair
                   </button>
 
-                  {/* Drafts en memoria */}
-                  {drafts.length > 0 && (
-                    <div style={{ marginBottom: 10 }}>
+                  <div style={labelStyle}>Spots de esta vista ({spots.length})</div>
+                  {spots.length === 0 && (
+                    <div style={{ opacity: 0.5, fontSize: 10, padding: 4, textAlign: 'center' }}>
+                      Esta vista no tiene spots todavía.
+                    </div>
+                  )}
+                  {spots.map((h) => {
+                    const dYaw = Math.round((coords.yaw - h.yaw) * 10) / 10;
+                    const aligned = Math.abs(dYaw) < 3;
+                    const badge =
+                      h.status === 'added'
+                        ? { txt: 'NUEVO', fg: '#80E090', bg: 'rgba(80,200,120,0.14)' }
+                        : h.status === 'moved'
+                          ? { txt: 'MOVIDO', fg: '#FFC080', bg: 'rgba(255,180,80,0.14)' }
+                          : null;
+                    return (
                       <div
+                        key={h.id}
                         style={{
-                          fontSize: 9,
-                          opacity: 0.55,
-                          letterSpacing: 1,
-                          marginBottom: 4,
+                          background: aligned ? 'rgba(93,213,240,0.12)' : 'rgba(255,255,255,0.04)',
+                          border: aligned ? '1px solid rgba(93,213,240,0.4)' : '1px solid transparent',
+                          borderRadius: 4,
+                          padding: '5px 7px',
+                          marginBottom: 3,
+                          fontSize: 10,
                         }}
                       >
-                        NUEVOS DRAFTS ({drafts.length})
-                      </div>
-                      {drafts.map((d) => (
-                        <div
-                          key={d.id}
-                          style={{
-                            background: 'rgba(93,213,240,0.08)',
-                            border: '1px solid rgba(93,213,240,0.3)',
-                            borderRadius: 4,
-                            padding: 6,
-                            marginBottom: 4,
-                            fontSize: 10,
-                          }}
-                        >
-                          <div style={{ display: 'flex', gap: 4, marginBottom: 3 }}>
-                            <input
-                              value={d.label}
-                              onChange={(e) => updateDraft(d.id, { label: e.target.value })}
-                              placeholder="Label"
-                              style={{
-                                flex: 1,
-                                background: 'rgba(0,0,0,0.4)',
-                                border: '1px solid rgba(232,217,176,0.2)',
-                                borderRadius: 3,
-                                color: '#E8D9B0',
-                                padding: '2px 5px',
-                                fontSize: 10,
-                                fontFamily: 'inherit',
-                              }}
-                            />
-                            <button
-                              onClick={() => removeDraft(d.id)}
-                              title="Eliminar draft"
-                              style={{
-                                background: 'rgba(255,80,80,0.15)',
-                                border: '1px solid rgba(255,80,80,0.4)',
-                                borderRadius: 3,
-                                color: '#FF8888',
-                                padding: '2px 6px',
-                                fontSize: 10,
-                                cursor: 'pointer',
-                                fontFamily: 'inherit',
-                              }}
-                            >
-                              ×
-                            </button>
-                          </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto auto auto', gap: 6, alignItems: 'center' }}>
+                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 600 }}>
+                            {badge && (
+                              <span style={{ fontSize: 8, color: badge.fg, background: badge.bg, padding: '1px 4px', borderRadius: 3, marginRight: 5 }}>
+                                {badge.txt}
+                              </span>
+                            )}
+                            {h.label}
+                          </span>
+                          <span style={{ opacity: 0.8, fontSize: 9 }}>
+                            p:{h.pitch} y:{h.yaw}
+                          </span>
+                          <button
+                            onClick={() => { try { viewerHandle.current?.lookAt?.(h.pitch, h.yaw, 100); } catch {} }}
+                            title="Apuntar la camara al spot"
+                            style={btn('ghost', { padding: '1px 6px', fontSize: 9 })}
+                          >
+                            go
+                          </button>
+                          <button
+                            onClick={() => debugActions.removeHotspot(currentSceneId, h.id)}
+                            title="Borrar este spot"
+                            style={btn('danger', { padding: '1px 6px', fontSize: 9 })}
+                          >
+                            ×
+                          </button>
+                        </div>
+                        {h.status === 'added' && (
                           <select
-                            value={d.targetSceneId ?? ''}
-                            onChange={(e) =>
-                              updateDraft(d.id, { targetSceneId: e.target.value })
-                            }
+                            value={h.targetSceneId ?? ''}
+                            onChange={(e) => setSpotTarget(h.id, e.target.value)}
                             style={{
                               width: '100%',
+                              marginTop: 4,
                               background: 'rgba(0,0,0,0.4)',
-                              border: '1px solid rgba(232,217,176,0.2)',
+                              border: `1px solid ${h.targetSceneId ? 'rgba(255, 255, 255,0.2)' : 'rgba(255,180,80,0.6)'}`,
                               borderRadius: 3,
-                              color: '#E8D9B0',
+                              color: '#FFFFFF',
                               padding: '2px 5px',
                               fontSize: 10,
                               fontFamily: 'inherit',
-                              marginBottom: 3,
                             }}
                           >
-                            <option value="">-- target scene --</option>
-                            {(selectedApartment?.scenes ?? []).map((s) => (
-                              <option key={s.id} value={s.id}>
-                                {s.name}
-                              </option>
-                            ))}
+                            <option value="">-- ¿a qué vista lleva? --</option>
+                            {(selectedApartment?.scenes ?? [])
+                              .filter((s) => s.id !== currentSceneId)
+                              .map((s) => (
+                                <option key={s.id} value={s.id}>
+                                  {s.name}
+                                </option>
+                              ))}
                           </select>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', opacity: 0.7 }}>
-                            <span>pitch: {d.pitch}</span>
-                            <span>yaw: {d.yaw}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Hotspots existentes */}
-                  {currentScene?.hotspots && currentScene.hotspots.length > 0 && (
-                    <>
-                      <div
-                        style={{
-                          fontSize: 9,
-                          opacity: 0.55,
-                          letterSpacing: 1,
-                          marginBottom: 4,
-                        }}
-                      >
-                        EN CONFIG ({currentScene.hotspots.length})
+                        )}
                       </div>
-                      {currentScene.hotspots.map((h) => {
-                        const dYaw = Math.round((coords.yaw - (h.yaw ?? 0)) * 10) / 10;
-                        const aligned = Math.abs(dYaw) < 3;
-                        return (
+                    );
+                  })}
+
+                  {/* Cambios guardados en todas las vistas */}
+                  <div style={{ marginTop: 10, paddingTop: 8, borderTop: '1px solid rgba(255, 255, 255,0.18)' }}>
+                    <div style={labelStyle}>Cambios guardados ({editedScenes.length} vistas)</div>
+                    {editedScenes.length === 0 ? (
+                      <div style={{ opacity: 0.5, fontSize: 10, padding: 4 }}>Aún no has movido ni creado spots.</div>
+                    ) : (
+                      <>
+                        {editedScenes.map((s) => (
                           <div
-                            key={h.id}
-                            style={{
-                              background: aligned
-                                ? 'rgba(93,213,240,0.12)'
-                                : 'rgba(255,255,255,0.04)',
-                              border: aligned
-                                ? '1px solid rgba(93,213,240,0.4)'
-                                : '1px solid transparent',
-                              borderRadius: 4,
-                              padding: '5px 7px',
-                              marginBottom: 3,
-                              fontSize: 10,
-                              display: 'grid',
-                              gridTemplateColumns: '1fr auto auto auto',
-                              gap: 6,
-                              alignItems: 'center',
-                            }}
+                            key={s.id}
+                            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 10, padding: '2px 0' }}
                           >
-                            <span
-                              style={{
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap',
-                                fontWeight: 600,
-                              }}
-                            >
-                              {h.label}
-                            </span>
-                            <span style={{ opacity: 0.7, fontSize: 9 }}>
-                              p:{h.pitch} y:{h.yaw}
-                            </span>
-                            <span
-                              style={{
-                                fontSize: 9,
-                                color: aligned ? '#5DD5F0' : 'rgba(232,217,176,0.45)',
-                                minWidth: 32,
-                                textAlign: 'right',
-                              }}
-                            >
-                              Δ{dYaw > 0 ? '+' : ''}{dYaw}
-                            </span>
                             <button
-                              onClick={() => {
-                                if (viewerHandle.current?.lookAt) {
-                                  try { viewerHandle.current.lookAt(h.pitch, h.yaw, 100); } catch {}
-                                }
-                              }}
-                              title="Apuntar la camara al hotspot"
-                              style={{
-                                background: 'rgba(232,217,176,0.1)',
-                                border: '1px solid rgba(232,217,176,0.25)',
-                                borderRadius: 3,
-                                color: '#E8D9B0',
-                                padding: '1px 6px',
-                                fontSize: 9,
-                                cursor: 'pointer',
-                                fontFamily: 'inherit',
-                              }}
+                              onClick={() => setCurrentScene(s.id)}
+                              title="Ir a esta vista"
+                              style={{ background: 'none', border: 'none', color: s.id === currentSceneId ? CYAN : '#FFFFFF', cursor: 'pointer', fontFamily: 'inherit', fontSize: 10, padding: 0, textAlign: 'left' }}
                             >
-                              go
+                              {s.name}
+                            </button>
+                            <button
+                              onClick={() => debugActions.clearScene(s.id)}
+                              title="Descartar los cambios de esta vista"
+                              style={btn('warn', { padding: '1px 6px', fontSize: 9 })}
+                            >
+                              descartar
                             </button>
                           </div>
-                        );
-                      })}
-                    </>
-                  )}
+                        ))}
+                        <div style={{ display: 'flex', gap: 4, marginTop: 6 }}>
+                          <button onClick={() => copy(exportEditedScenes(), 'edited')} style={btn('green', { flex: 1 })}>
+                            {copied === 'edited' ? '✓ copiado' : 'Copiar cambios (todas las vistas)'}
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (window.confirm('¿Descartar los cambios de TODAS las vistas?')) debugActions.clearAll();
+                            }}
+                            style={btn('danger')}
+                          >
+                            descartar todo
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </>
               )}
 
@@ -986,7 +995,7 @@ ${lines.join('\n')}
                         style={{
                           marginTop: 10,
                           paddingTop: 8,
-                          borderTop: '1px solid rgba(232,217,176,0.18)',
+                          borderTop: '1px solid rgba(255, 255, 255,0.18)',
                         }}
                       >
                         <div
@@ -1009,26 +1018,29 @@ ${lines.join('\n')}
                             opacity: 0.85,
                           }}
                         >
-                          actual:{' '}
+                          en config:{' '}
                           {currentScene.variantButton
                             ? `p:${currentScene.variantButton.pitch}, y:${currentScene.variantButton.yaw}`
                             : '(no fijado)'}
                         </div>
-                        {draftVariantBtn && (
+                        {edits.variantBtn[currentSceneId] && (
                           <div
                             style={{
-                              background: 'rgba(93,213,240,0.12)',
-                              border: '1px solid rgba(93,213,240,0.4)',
+                              background: 'rgba(255,180,80,0.12)',
+                              border: '1px solid rgba(255,180,80,0.4)',
                               borderRadius: 4,
                               padding: '5px 7px',
                               marginBottom: 6,
                               fontSize: 10,
                             }}
                           >
-                            <b style={{ color: '#5DD5F0' }}>draft:</b> p:{draftVariantBtn.pitch}, y:
-                            {draftVariantBtn.yaw}
+                            <b style={{ color: '#FFC080' }}>movido:</b> p:{edits.variantBtn[currentSceneId].pitch}, y:
+                            {edits.variantBtn[currentSceneId].yaw}
                           </div>
                         )}
+                        <div style={{ fontSize: 9, opacity: 0.6, marginBottom: 6 }}>
+                          También puedes arrastrar el botón directamente en el panorama.
+                        </div>
                         <button
                           onClick={setVariantBtnHere}
                           style={{
@@ -1075,7 +1087,7 @@ ${lines.join('\n')}
                   </div>
 
                   {/* Ajustes de velocidad / HFOV */}
-                  <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(232,217,176,0.18)', borderRadius: 6, padding: 7, marginBottom: 8 }}>
+                  <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255, 255, 255,0.18)', borderRadius: 6, padding: 7, marginBottom: 8 }}>
                     <div style={labelStyle}>Velocidad / HFOV (preview + export)</div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 7 }}>
                       {([
@@ -1110,7 +1122,7 @@ ${lines.join('\n')}
                   </div>
 
                   {/* Captura from → to */}
-                  <div style={{ display: 'flex', gap: 4, marginBottom: 6, padding: 6, background: 'rgba(255,255,255,0.03)', borderRadius: 6, border: '1px solid rgba(232,217,176,0.18)' }}>
+                  <div style={{ display: 'flex', gap: 4, marginBottom: 6, padding: 6, background: 'rgba(255,255,255,0.03)', borderRadius: 6, border: '1px solid rgba(255, 255, 255,0.18)' }}>
                     <button onClick={markFrom} title="Marca la vista actual como inicio del tramo" style={btn('cyan', { flex: 1, border: '1px dashed rgba(93,213,240,0.5)', background: pendingFrom ? 'rgba(93,213,240,0.28)' : 'rgba(93,213,240,0.12)' })}>
                       {pendingFrom ? `FROM ✓ (y:${pendingFrom.yaw})` : '① Marcar inicio'}
                     </button>
@@ -1238,7 +1250,7 @@ ${lines.join('\n')}
                     }}
                   >
                     {copied === 'export-scene'
-                      ? '✓ Escena copiada (drafts + variantButton incluidos)'
+                      ? '✓ Escena copiada (spots editados + variantButton incluidos)'
                       : 'Exportar escena actual completa'}
                   </button>
                   <button
@@ -1347,7 +1359,7 @@ ${lines.join('\n')}
                                   ? '2px solid #FFC080'
                                   : '2px solid #888',
                             borderRadius: 3,
-                            color: '#E8D9B0',
+                            color: '#FFFFFF',
                             lineHeight: 1.4,
                           }}
                         >
@@ -1366,7 +1378,7 @@ ${lines.join('\n')}
                 fontSize: 9,
                 opacity: 0.4,
                 padding: '4px 10px 8px',
-                borderTop: '1px solid rgba(232,217,176,0.1)',
+                borderTop: '1px solid rgba(255, 255, 255,0.1)',
                 lineHeight: 1.4,
               }}
             >

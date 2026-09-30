@@ -164,10 +164,10 @@ export default function LeftSidebar() {
         className="fixed top-0 left-0 h-full z-[70] flex flex-col overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
         style={{
           width: isOpen ? PANEL_W : 0,
-          background: 'rgba(10,8,6,0.95)',
+          background: 'rgba(10, 10, 10,0.95)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
-          borderRight: `1px solid rgba(232,217,176,0.12)`,
+          borderRight: `1px solid rgba(255, 255, 255,0.12)`,
           boxShadow: isOpen ? '4px 0 32px rgba(0,0,0,0.5)' : 'none',
         }}
       >
@@ -180,15 +180,15 @@ export default function LeftSidebar() {
             pointerEvents: isOpen ? 'auto' : 'none',
           }}
         >
-          {/* ── Logo Valle Alto ── */}
+          {/* ── Logo del proyecto ── */}
           <div
             className="flex flex-col items-center px-5 pt-6 pb-5"
-            style={{ borderBottom: '1px solid rgba(232,217,176,0.08)' }}
+            style={{ borderBottom: '1px solid rgba(255, 255, 255,0.08)' }}
           >
             <BrandLogo style={{ width: 160 }} />
             <span
               className="mt-2 text-[10px] tracking-widest uppercase select-none"
-              style={{ color: 'rgba(232,217,176,0.35)' }}
+              style={{ color: 'rgba(255, 255, 255,0.35)' }}
             >
               Constructora Meléndez
             </span>
@@ -201,13 +201,13 @@ export default function LeftSidebar() {
             <button
               onClick={handleInicio}
               className="flex items-center gap-3 px-5 py-3 w-full text-left transition-all duration-150 group"
-              style={{ color: 'rgba(232,217,176,0.65)' }}
+              style={{ color: 'rgba(255, 255, 255,0.65)' }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.color = '#E8D9B0';
-                (e.currentTarget as HTMLButtonElement).style.background = 'rgba(232,217,176,0.06)';
+                (e.currentTarget as HTMLButtonElement).style.color = '#FFFFFF';
+                (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255, 255, 255,0.06)';
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.color = 'rgba(232,217,176,0.65)';
+                (e.currentTarget as HTMLButtonElement).style.color = 'rgba(255, 255, 255,0.65)';
                 (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
               }}
             >
@@ -218,7 +218,7 @@ export default function LeftSidebar() {
             </button>
 
             {/* Separador */}
-            <div style={{ height: 1, background: 'rgba(232,217,176,0.08)', margin: '2px 0' }} />
+            <div style={{ height: 1, background: 'rgba(255, 255, 255,0.08)', margin: '2px 0' }} />
 
             {/* Apartamentos */}
             {apartments.map((apt) => {
@@ -235,20 +235,20 @@ export default function LeftSidebar() {
                     className="flex items-center gap-3 px-5 py-3 w-full text-left transition-all duration-150"
                     style={{
                       color: !available
-                        ? 'rgba(232,217,176,0.35)'
-                        : isActive ? '#E8D9B0' : 'rgba(232,217,176,0.65)',
-                      background: isActive ? 'rgba(232,217,176,0.08)' : 'transparent',
+                        ? 'rgba(255, 255, 255,0.35)'
+                        : isActive ? '#FFFFFF' : 'rgba(255, 255, 255,0.65)',
+                      background: isActive ? 'rgba(255, 255, 255,0.08)' : 'transparent',
                       cursor: available ? 'pointer' : 'default',
                     }}
                     onMouseEnter={(e) => {
                       if (!isActive && available) {
-                        (e.currentTarget as HTMLButtonElement).style.color = '#E8D9B0';
-                        (e.currentTarget as HTMLButtonElement).style.background = 'rgba(232,217,176,0.05)';
+                        (e.currentTarget as HTMLButtonElement).style.color = '#FFFFFF';
+                        (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255, 255, 255,0.05)';
                       }
                     }}
                     onMouseLeave={(e) => {
                       if (!isActive && available) {
-                        (e.currentTarget as HTMLButtonElement).style.color = 'rgba(232,217,176,0.65)';
+                        (e.currentTarget as HTMLButtonElement).style.color = 'rgba(255, 255, 255,0.65)';
                         (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
                       }
                     }}
@@ -273,8 +273,8 @@ export default function LeftSidebar() {
                       <span
                         className="shrink-0 text-[9px] tracking-wider uppercase px-1.5 py-0.5 rounded"
                         style={{
-                          background: 'rgba(232,217,176,0.06)',
-                          color: 'rgba(232,217,176,0.35)',
+                          background: 'rgba(255, 255, 255,0.06)',
+                          color: 'rgba(255, 255, 255,0.35)',
                         }}
                       >
                         Próx.
@@ -306,21 +306,21 @@ export default function LeftSidebar() {
                             className="flex items-center gap-3 pl-10 pr-4 py-2.5 w-full text-left transition-all duration-150"
                             style={{
                               color: isCurrentScene
-                                ? '#E8D9B0'
-                                : 'rgba(232,217,176,0.5)',
+                                ? '#FFFFFF'
+                                : 'rgba(255, 255, 255,0.5)',
                               background: isCurrentScene
-                                ? 'rgba(232,217,176,0.08)'
+                                ? 'rgba(255, 255, 255,0.08)'
                                 : 'transparent',
                             }}
                             onMouseEnter={(e) => {
                               if (!isCurrentScene) {
-                                (e.currentTarget as HTMLButtonElement).style.color = 'rgba(232,217,176,0.85)';
-                                (e.currentTarget as HTMLButtonElement).style.background = 'rgba(232,217,176,0.04)';
+                                (e.currentTarget as HTMLButtonElement).style.color = 'rgba(255, 255, 255,0.85)';
+                                (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255, 255, 255,0.04)';
                               }
                             }}
                             onMouseLeave={(e) => {
                               if (!isCurrentScene) {
-                                (e.currentTarget as HTMLButtonElement).style.color = 'rgba(232,217,176,0.5)';
+                                (e.currentTarget as HTMLButtonElement).style.color = 'rgba(255, 255, 255,0.5)';
                                 (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
                               }
                             }}
@@ -341,7 +341,7 @@ export default function LeftSidebar() {
                             {isCurrentScene && (
                               <span
                                 className="shrink-0 w-1.5 h-1.5 rounded-full"
-                                style={{ background: '#E8D9B0' }}
+                                style={{ background: '#FFFFFF' }}
                               />
                             )}
                           </button>
@@ -352,7 +352,7 @@ export default function LeftSidebar() {
 
                   {/* Separador entre apartamentos */}
                   <div
-                    style={{ height: 1, background: 'rgba(232,217,176,0.08)', margin: '2px 0' }}
+                    style={{ height: 1, background: 'rgba(255, 255, 255,0.08)', margin: '2px 0' }}
                   />
                 </div>
               );
@@ -369,18 +369,18 @@ export default function LeftSidebar() {
                     onClick={handleSelectAmenities}
                     className="flex items-center gap-3 px-5 py-3 w-full text-left transition-all duration-150"
                     style={{
-                      color: isActive ? '#E8D9B0' : 'rgba(232,217,176,0.65)',
-                      background: isActive ? 'rgba(232,217,176,0.08)' : 'transparent',
+                      color: isActive ? '#FFFFFF' : 'rgba(255, 255, 255,0.65)',
+                      background: isActive ? 'rgba(255, 255, 255,0.08)' : 'transparent',
                     }}
                     onMouseEnter={(e) => {
                       if (!isActive) {
-                        (e.currentTarget as HTMLButtonElement).style.color = '#E8D9B0';
-                        (e.currentTarget as HTMLButtonElement).style.background = 'rgba(232,217,176,0.05)';
+                        (e.currentTarget as HTMLButtonElement).style.color = '#FFFFFF';
+                        (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255, 255, 255,0.05)';
                       }
                     }}
                     onMouseLeave={(e) => {
                       if (!isActive) {
-                        (e.currentTarget as HTMLButtonElement).style.color = 'rgba(232,217,176,0.65)';
+                        (e.currentTarget as HTMLButtonElement).style.color = 'rgba(255, 255, 255,0.65)';
                         (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
                       }
                     }}
@@ -413,18 +413,18 @@ export default function LeftSidebar() {
                             }}
                             className="flex items-center gap-3 pl-10 pr-4 py-2.5 w-full text-left transition-all duration-150"
                             style={{
-                              color: isCurrentScene ? '#E8D9B0' : 'rgba(232,217,176,0.5)',
-                              background: isCurrentScene ? 'rgba(232,217,176,0.08)' : 'transparent',
+                              color: isCurrentScene ? '#FFFFFF' : 'rgba(255, 255, 255,0.5)',
+                              background: isCurrentScene ? 'rgba(255, 255, 255,0.08)' : 'transparent',
                             }}
                             onMouseEnter={(e) => {
                               if (!isCurrentScene) {
-                                (e.currentTarget as HTMLButtonElement).style.color = 'rgba(232,217,176,0.85)';
-                                (e.currentTarget as HTMLButtonElement).style.background = 'rgba(232,217,176,0.04)';
+                                (e.currentTarget as HTMLButtonElement).style.color = 'rgba(255, 255, 255,0.85)';
+                                (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255, 255, 255,0.04)';
                               }
                             }}
                             onMouseLeave={(e) => {
                               if (!isCurrentScene) {
-                                (e.currentTarget as HTMLButtonElement).style.color = 'rgba(232,217,176,0.5)';
+                                (e.currentTarget as HTMLButtonElement).style.color = 'rgba(255, 255, 255,0.5)';
                                 (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
                               }
                             }}
@@ -438,7 +438,7 @@ export default function LeftSidebar() {
                             {isCurrentScene && (
                               <span
                                 className="shrink-0 w-1.5 h-1.5 rounded-full"
-                                style={{ background: '#E8D9B0' }}
+                                style={{ background: '#FFFFFF' }}
                               />
                             )}
                           </button>
@@ -451,19 +451,19 @@ export default function LeftSidebar() {
             })()}
 
             {/* Separador */}
-            <div style={{ height: 1, background: 'rgba(232,217,176,0.08)', margin: '2px 0' }} />
+            <div style={{ height: 1, background: 'rgba(255, 255, 255,0.08)', margin: '2px 0' }} />
 
             {/* GALERIA */}
             <button
               onClick={handleGaleria}
               className="flex items-center gap-3 px-5 py-3 w-full text-left transition-all duration-150"
-              style={{ color: 'rgba(232,217,176,0.65)' }}
+              style={{ color: 'rgba(255, 255, 255,0.65)' }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.color = '#E8D9B0';
-                (e.currentTarget as HTMLButtonElement).style.background = 'rgba(232,217,176,0.06)';
+                (e.currentTarget as HTMLButtonElement).style.color = '#FFFFFF';
+                (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255, 255, 255,0.06)';
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.color = 'rgba(232,217,176,0.65)';
+                (e.currentTarget as HTMLButtonElement).style.color = 'rgba(255, 255, 255,0.65)';
                 (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
               }}
             >
@@ -474,19 +474,19 @@ export default function LeftSidebar() {
             </button>
 
             {/* Separador */}
-            <div style={{ height: 1, background: 'rgba(232,217,176,0.08)', margin: '2px 0' }} />
+            <div style={{ height: 1, background: 'rgba(255, 255, 255,0.08)', margin: '2px 0' }} />
 
             {/* PLANTAS — abre el visor de plantas del proyecto */}
             <button
               onClick={handlePlantas}
               className="flex items-center gap-3 px-5 py-3 w-full text-left transition-all duration-150"
-              style={{ color: 'rgba(232,217,176,0.65)' }}
+              style={{ color: 'rgba(255, 255, 255,0.65)' }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.color = '#E8D9B0';
-                (e.currentTarget as HTMLButtonElement).style.background = 'rgba(232,217,176,0.06)';
+                (e.currentTarget as HTMLButtonElement).style.color = '#FFFFFF';
+                (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255, 255, 255,0.06)';
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.color = 'rgba(232,217,176,0.65)';
+                (e.currentTarget as HTMLButtonElement).style.color = 'rgba(255, 255, 255,0.65)';
                 (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
               }}
             >
@@ -497,20 +497,20 @@ export default function LeftSidebar() {
             </button>
 
             {/* Separador */}
-            <div style={{ height: 1, background: 'rgba(232,217,176,0.08)', margin: '2px 0' }} />
+            <div style={{ height: 1, background: 'rgba(255, 255, 255,0.08)', margin: '2px 0' }} />
 
             {/* REALIDAD VIRTUAL — página A-Frame estática (Oculus Quest) */}
             <a
               href={vrHref}
               onClick={handleVrClick}
               className="flex items-center gap-3 px-5 py-3 w-full text-left transition-all duration-150"
-              style={{ color: 'rgba(232,217,176,0.65)', textDecoration: 'none' }}
+              style={{ color: 'rgba(255, 255, 255,0.65)', textDecoration: 'none' }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLAnchorElement).style.color = '#E8D9B0';
-                (e.currentTarget as HTMLAnchorElement).style.background = 'rgba(232,217,176,0.06)';
+                (e.currentTarget as HTMLAnchorElement).style.color = '#FFFFFF';
+                (e.currentTarget as HTMLAnchorElement).style.background = 'rgba(255, 255, 255,0.06)';
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLAnchorElement).style.color = 'rgba(232,217,176,0.65)';
+                (e.currentTarget as HTMLAnchorElement).style.color = 'rgba(255, 255, 255,0.65)';
                 (e.currentTarget as HTMLAnchorElement).style.background = 'transparent';
               }}
             >
@@ -525,7 +525,7 @@ export default function LeftSidebar() {
           {/* ── Aviso legal con scroll ── */}
           <div
             className="px-5 py-3"
-            style={{ borderTop: '1px solid rgba(232,217,176,0.08)' }}
+            style={{ borderTop: '1px solid rgba(255, 255, 255,0.08)' }}
           >
             <p
               className="overflow-y-auto pr-1 text-justify sidebar-scrollbar"
@@ -533,10 +533,10 @@ export default function LeftSidebar() {
                 maxHeight: 96,
                 fontSize: 9,
                 lineHeight: 1.5,
-                color: 'rgba(232,217,176,0.35)',
+                color: 'rgba(255, 255, 255,0.35)',
               }}
             >
-              Las imágenes utilizadas en la promoción del proyecto VALLE ALTO son
+              Las imágenes utilizadas en la promoción del proyecto TIERRA LINDA DE LA PRADERA son
               representaciones digitales de referencia y, al igual que los apartamentos
               modelo de CONSTRUCTORA MELÉNDEZ, pueden diferir en su diseño y construcción
               final. Las áreas privadas y construidas están sujetas a ajustes por razones
@@ -553,7 +553,7 @@ export default function LeftSidebar() {
           {/* ── Branding al fondo: Constructora + Productor ── */}
           <div
             className="px-5 py-5 flex flex-col items-center"
-            style={{ borderTop: '1px solid rgba(232,217,176,0.08)' }}
+            style={{ borderTop: '1px solid rgba(255, 255, 255,0.08)' }}
           >
             {/* Constructora Meléndez */}
             <span
@@ -561,7 +561,7 @@ export default function LeftSidebar() {
               style={{
                 fontSize: 8,
                 letterSpacing: '0.3em',
-                color: 'rgba(232,217,176,0.35)',
+                color: 'rgba(255, 255, 255,0.35)',
                 fontWeight: 600,
                 marginBottom: 8,
               }}
@@ -580,7 +580,7 @@ export default function LeftSidebar() {
               style={{
                 width: 40,
                 height: 1,
-                background: 'rgba(232,217,176,0.12)',
+                background: 'rgba(255, 255, 255,0.12)',
                 margin: '16px 0',
               }}
             />
@@ -591,7 +591,7 @@ export default function LeftSidebar() {
               style={{
                 fontSize: 8,
                 letterSpacing: '0.3em',
-                color: 'rgba(232,217,176,0.35)',
+                color: 'rgba(255, 255, 255,0.35)',
                 fontWeight: 600,
                 marginBottom: 8,
               }}
@@ -622,15 +622,15 @@ export default function LeftSidebar() {
           transform: 'translateY(-50%)',
           width: 22,
           height: 64,
-          background: isOpen ? 'rgba(10,8,6,0)' : 'rgba(10,8,6,0.95)',
+          background: isOpen ? 'rgba(10, 10, 10,0)' : 'rgba(10, 10, 10,0.95)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
-          borderTop: isOpen ? 'none' : '1px solid rgba(232,217,176,0.12)',
-          borderRight: isOpen ? 'none' : '1px solid rgba(232,217,176,0.12)',
-          borderBottom: isOpen ? 'none' : '1px solid rgba(232,217,176,0.12)',
+          borderTop: isOpen ? 'none' : '1px solid rgba(255, 255, 255,0.12)',
+          borderRight: isOpen ? 'none' : '1px solid rgba(255, 255, 255,0.12)',
+          borderBottom: isOpen ? 'none' : '1px solid rgba(255, 255, 255,0.12)',
           borderLeft: 'none',
           borderRadius: '0 6px 6px 0',
-          color: 'rgba(232,217,176,0.55)',
+          color: 'rgba(255, 255, 255,0.55)',
           cursor: isOpen ? 'default' : 'pointer',
         }}
       >
@@ -655,7 +655,7 @@ export default function LeftSidebar() {
           aria-modal="true"
           className="fixed inset-0 z-[120] flex items-center justify-center p-6"
           style={{
-            background: 'rgba(10,8,6,0.75)',
+            background: 'rgba(10, 10, 10,0.75)',
             backdropFilter: 'blur(8px)',
             WebkitBackdropFilter: 'blur(8px)',
           }}
@@ -667,8 +667,8 @@ export default function LeftSidebar() {
               maxWidth: 380,
               width: '100%',
               padding: '32px 28px',
-              background: 'rgba(18,14,10,0.98)',
-              border: '1px solid rgba(232,217,176,0.18)',
+              background: 'rgba(18, 18, 18,0.98)',
+              border: '1px solid rgba(255, 255, 255,0.18)',
               borderRadius: 14,
               boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
             }}
@@ -679,12 +679,12 @@ export default function LeftSidebar() {
                 width: 56,
                 height: 56,
                 borderRadius: '50%',
-                background: 'rgba(232,217,176,0.08)',
-                border: '1px solid rgba(232,217,176,0.18)',
+                background: 'rgba(255, 255, 255,0.08)',
+                border: '1px solid rgba(255, 255, 255,0.18)',
                 marginBottom: 18,
               }}
             >
-              <Glasses size={26} style={{ color: '#E8D9B0' }} />
+              <Glasses size={26} style={{ color: '#FFFFFF' }} />
             </div>
             <h3
               className="uppercase"
@@ -692,7 +692,7 @@ export default function LeftSidebar() {
                 fontSize: 14,
                 fontWeight: 700,
                 letterSpacing: '0.18em',
-                color: '#E8D9B0',
+                color: '#FFFFFF',
                 marginBottom: 12,
               }}
             >
@@ -702,12 +702,12 @@ export default function LeftSidebar() {
               style={{
                 fontSize: 13,
                 lineHeight: 1.6,
-                color: 'rgba(232,217,176,0.7)',
+                color: 'rgba(255, 255, 255,0.7)',
                 marginBottom: 24,
               }}
             >
               El recorrido inmersivo en realidad virtual requiere unas gafas{' '}
-              <strong style={{ color: '#E8D9B0' }}>Meta Quest (Oculus)</strong>.
+              <strong style={{ color: '#FFFFFF' }}>Meta Quest (Oculus)</strong>.
               Ábrelo desde el navegador de tus gafas para vivir la experiencia 360°
               completa. En PC y móvil puedes continuar con el tour interactivo normal.
             </p>
@@ -720,17 +720,17 @@ export default function LeftSidebar() {
                 fontSize: 11,
                 fontWeight: 700,
                 letterSpacing: '0.18em',
-                color: '#0A0806',
-                background: '#E8D9B0',
+                color: '#0A0A0A',
+                background: '#FFFFFF',
                 border: 'none',
                 borderRadius: 8,
                 cursor: 'pointer',
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.background = '#f2e6c4';
+                (e.currentTarget as HTMLButtonElement).style.background = '#FFFFFF';
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.background = '#E8D9B0';
+                (e.currentTarget as HTMLButtonElement).style.background = '#FFFFFF';
               }}
             >
               Entendido

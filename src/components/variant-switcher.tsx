@@ -38,8 +38,8 @@ export default function VariantSwitcher() {
     <>
       <style>{`
         @keyframes variant-pulse {
-          0%, 100% { box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 0 rgba(232,217,176,0.0); }
-          50%      { box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 10px rgba(232,217,176,0.18); }
+          0%, 100% { box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 0 rgba(255, 255, 255,0.0); }
+          50%      { box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 10px rgba(255, 255, 255,0.18); }
         }
         @keyframes variant-slide-in {
           from { opacity: 0; transform: translate(-50%, -8px); }
@@ -59,8 +59,8 @@ export default function VariantSwitcher() {
         <div
           className="flex items-center rounded-full backdrop-blur-xl"
           style={{
-            background: 'rgba(10,8,6,0.78)',
-            border: '1px solid rgba(232,217,176,0.22)',
+            background: 'rgba(10, 10, 10,0.78)',
+            border: '1px solid rgba(255, 255, 255,0.22)',
             padding: 4,
             gap: 2,
             boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
@@ -72,7 +72,7 @@ export default function VariantSwitcher() {
             className="hidden md:flex items-center gap-1.5 select-none"
             style={{
               padding: '4px 12px 4px 10px',
-              color: 'rgba(232,217,176,0.55)',
+              color: 'rgba(255, 255, 255,0.55)',
               fontSize: 10,
               fontWeight: 700,
               letterSpacing: 1.4,
@@ -98,8 +98,8 @@ export default function VariantSwitcher() {
                   fontWeight: 600,
                   letterSpacing: 0.3,
                   cursor: isTransitioning ? 'wait' : isActive ? 'default' : 'pointer',
-                  background: isActive ? '#E8D9B0' : 'transparent',
-                  color: isActive ? '#0a0806' : 'rgba(232,217,176,0.7)',
+                  background: isActive ? '#FFFFFF' : 'transparent',
+                  color: isActive ? '#0A0A0A' : 'rgba(255, 255, 255,0.7)',
                   border: 'none',
                   fontFamily: 'inherit',
                   whiteSpace: 'nowrap',
@@ -107,14 +107,14 @@ export default function VariantSwitcher() {
                 onMouseEnter={(e) => {
                   if (!isActive && !isTransitioning) {
                     (e.currentTarget as HTMLButtonElement).style.background =
-                      'rgba(232,217,176,0.08)';
-                    (e.currentTarget as HTMLButtonElement).style.color = '#E8D9B0';
+                      'rgba(255, 255, 255,0.08)';
+                    (e.currentTarget as HTMLButtonElement).style.color = '#FFFFFF';
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (!isActive) {
                     (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
-                    (e.currentTarget as HTMLButtonElement).style.color = 'rgba(232,217,176,0.7)';
+                    (e.currentTarget as HTMLButtonElement).style.color = 'rgba(255, 255, 255,0.7)';
                   }
                 }}
               >

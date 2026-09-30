@@ -6,11 +6,11 @@ import BrandLogo from '@/components/brand-logo';
 
 const BRAND = (path: string) => assetPath(`/projects/melendez/branding/${path}`);
 
-// Valle Alto palette — fondo sage oscuro profundo
-const BG    = '#1A2420'; // sage oscuro profundo
-const BEIGE = '#E8D9B0'; // arena/crema (logo natural)
-const SAGE  = '#8FA89A'; // sage claro (anillos)
-const LIMA  = '#C8CF6A'; // verde-lima (acento)
+// Paleta del proyecto (la del logo de Tierra Linda)
+const BG    = '#333333'; // gris oscuro
+const BEIGE = '#FFFFFF'; // blanco
+const SAGE  = '#766E6B'; // cafe oscuro (anillos)
+const LIMA  = '#E3000F'; // rojo (acento)
 
 interface SplashScreenProps {
   onComplete: () => void;
@@ -96,6 +96,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
         transition: 'transform 0.9s cubic-bezier(0.34,1.56,0.64,1), opacity 0.7s ease',
       }}>
         <BrandLogo
+          variant="vertical"
           style={{
             width: 220,
             filter: `drop-shadow(0 0 14px ${BEIGE}28)`,
