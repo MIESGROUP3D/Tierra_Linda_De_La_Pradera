@@ -231,6 +231,52 @@ const HOTSPOT_CSS = `
 }
 `;
 
+/* ── Pantalla de carga del panorama (reemplaza el "Loading..." de Pannellum)
+   Logo de marca + texto + barra de progreso roja con porcentaje. Se inyecta
+   en runtime porque la URL del logo depende del basePath (assetPath). */
+const loaderCss = (logoUrl: string) => `
+.pnlm-container { background: #333333 radial-gradient(ellipse at 50% 50%, rgba(118,110,107,0.18) 0%, transparent 60%) !important; }
+.pnlm-load-box {
+  background: transparent !important;
+  width: 260px !important;
+  height: auto !important;
+  margin: 0 !important;
+  transform: translate(-50%, -50%);
+  border-radius: 0 !important;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 10px !important;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.7) !important;
+}
+.pnlm-load-box::before {
+  content: '';
+  display: block;
+  width: 200px;
+  aspect-ratio: 822 / 207;
+  margin: 0 auto 26px;
+  background: url("${logoUrl}") center / contain no-repeat;
+}
+.pnlm-load-box p { margin: 0 0 14px !important; }
+.pnlm-lbar {
+  width: 170px !important;
+  height: 2px !important;
+  border: none !important;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.15);
+  overflow: hidden;
+}
+.pnlm-lbar-fill { background: #E3000F !important; transition: width 0.25s ease; }
+.pnlm-load-box .pnlm-lmsg {
+  margin: 10px 0 0 !important;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: rgba(255,255,255,0.45);
+}
+.pnlm-loading { background-color: #E3000F !important; }
+`;
+
 /* ------------------------------------------------------------------ */
 /*  Room-aware SVG icons                                              */
 /* ------------------------------------------------------------------ */
@@ -537,7 +583,8 @@ const PanoViewer = forwardRef<PanoViewerHandle, PanoViewerProps>(
       cssInjected.current = true;
       const tag = document.createElement('style');
       tag.dataset.panoCss = 'true';
-      tag.textContent = HOTSPOT_CSS;
+      tag.textContent =
+        HOTSPOT_CSS + loaderCss(assetPath('/projects/melendez/branding/LogoTierraLindaHorizontalOscuro.png'));
       document.head.appendChild(tag);
     }, []);
 
@@ -702,6 +749,7 @@ const PanoViewer = forwardRef<PanoViewerHandle, PanoViewerProps>(
           mouseZoom: true,
           hotSpots: hotspots,
           autoLoad: true,
+          strings: { loadingLabel: 'Cargando recorrido' },
           showControls: false,
           draggable: true,
           friction: 0.15,

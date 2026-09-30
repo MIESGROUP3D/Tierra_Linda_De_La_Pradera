@@ -6,6 +6,7 @@ import { Bed, Bath, Maximize2, Eye, ArrowRight, Clock, Sparkles } from 'lucide-r
 import type { BuildingConfig, ApartmentConfig } from '@/lib/tour-types';
 import { assetPath } from '@/lib/asset-path';
 import BrandLogo from '@/components/brand-logo';
+import { formatArea } from '@/lib/format';
 
 /**
  * Un apartamento se considera "disponible" si:
@@ -325,10 +326,23 @@ function BuildingHotspot({
               <span className="flex items-center gap-1"><Sparkles size={12} /> {apt.scenes.length} espacios 360°</span>
             </div>
           ) : (
-            <div className="flex items-center gap-3 mb-4 text-[11px]" style={{ color: `${BEIGE}80` }}>
-              <span className="flex items-center gap-1"><Bed size={12} /> {apt.bedrooms}</span>
-              <span className="flex items-center gap-1"><Bath size={12} /> {apt.bathrooms}</span>
-              <span className="flex items-center gap-1"><Maximize2 size={12} /> {apt.area.toLocaleString('es-CO')}m²</span>
+            <div className="mb-4 text-[11px]" style={{ color: `${BEIGE}80` }}>
+              <div className="flex items-center gap-3 mb-1.5">
+                <span className="flex items-center gap-1"><Bed size={12} /> {apt.bedrooms}</span>
+                <span className="flex items-center gap-1"><Bath size={12} /> {apt.bathrooms}</span>
+              </div>
+              {/* Areas con etiqueta, como en el plano comercial */}
+              <div className="flex items-start gap-1">
+                <Maximize2 size={12} className="mt-[2px] shrink-0" />
+                <span className="leading-snug">
+                  Área construida: {formatArea(apt.area)} m²
+                  {apt.areaPrivada ? (
+                    <>
+                      <br />Área privada: {formatArea(apt.areaPrivada)} m²
+                    </>
+                  ) : null}
+                </span>
+              </div>
             </div>
           )}
 

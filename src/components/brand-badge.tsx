@@ -2,6 +2,7 @@
 
 import { useTourStore } from '@/lib/tour-store';
 import BrandLogo from '@/components/brand-logo';
+import { formatArea } from '@/lib/format';
 
 export default function BrandBadge() {
   const { config, selectedApartment } = useTourStore();
@@ -23,10 +24,10 @@ export default function BrandBadge() {
         {/* Áreas debajo del tipo de apartamento (solo apartamentos con área) */}
         {selectedApartment && selectedApartment.area > 0 && (
           <p className="text-[10px] md:text-[11px] font-semibold leading-tight" style={{ color: 'rgba(255, 255, 255,0.75)' }}>
-            Área construida {selectedApartment.area.toLocaleString('es-CO')} m²
+            Área construida {formatArea(selectedApartment.area)} m²
             {selectedApartment.areaPrivada ? (
               <>
-                <br />Área privada {selectedApartment.areaPrivada.toLocaleString('es-CO')} m²
+                <br />Área privada {formatArea(selectedApartment.areaPrivada)} m²
               </>
             ) : null}
           </p>

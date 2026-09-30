@@ -450,10 +450,12 @@ export default function LeftSidebar() {
               );
             })()}
 
+            {/* GALERIA — solo si el proyecto tiene renders en config.gallery */}
+            {(config.gallery?.length ?? 0) > 0 && (
+            <>
             {/* Separador */}
             <div style={{ height: 1, background: 'rgba(255, 255, 255,0.08)', margin: '2px 0' }} />
 
-            {/* GALERIA */}
             <button
               onClick={handleGaleria}
               className="flex items-center gap-3 px-5 py-3 w-full text-left transition-all duration-150"
@@ -472,6 +474,8 @@ export default function LeftSidebar() {
                 Galería
               </span>
             </button>
+            </>
+            )}
 
             {/* Separador */}
             <div style={{ height: 1, background: 'rgba(255, 255, 255,0.08)', margin: '2px 0' }} />

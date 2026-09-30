@@ -465,8 +465,8 @@ export default function FloorPlan() {
                           >
                             <path
                               d={`M ${dot.cx} ${dot.cy} L ${lx} ${ly} A ${coneR} ${coneR} 0 0 1 ${rx2} ${ry2} Z`}
-                              fill="rgba(227,0,15,0.35)"
-                              stroke="#E3000F"
+                              fill="rgba(227,0,15,0.16)"
+                              stroke="rgba(227,0,15,0.55)"
                               strokeWidth={expanded ? 2 : 1.5}
                               strokeLinejoin="round"
                               filter="url(#fp-shadow)"

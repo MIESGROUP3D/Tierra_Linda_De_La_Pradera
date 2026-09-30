@@ -88,7 +88,7 @@ interface DebugPanelProps {
 
 type Tab = 'hotspots' | 'variants' | 'playback' | 'plan' | 'export' | 'check';
 
-/** Prefijo comun de dos ids hasta el ultimo '-' (tl-tg-cocina / tl-tg-balcon → 'tl-tg-'). */
+/** Prefijo comun de dos ids hasta el ultimo '-' (tl-tf-cocina / tl-tf-balcon → 'tl-tf-'). */
 function commonIdPrefix(a: string, b: string): string {
   let i = 0;
   while (i < a.length && i < b.length && a[i] === b[i]) i++;
@@ -96,7 +96,7 @@ function commonIdPrefix(a: string, b: string): string {
   return cut >= 0 ? a.slice(0, cut + 1) : '';
 }
 
-/** Id legible para un spot nuevo: tl-tg-cocina + tl-tg-balcon → tl-tg-cocina-to-balcon */
+/** Id legible para un spot nuevo: tl-tf-cocina + tl-tf-balcon → tl-tf-cocina-to-balcon */
 function spotIdFor(sceneId: string, targetId: string, taken: Set<string>): string {
   const prefix = commonIdPrefix(sceneId, targetId);
   const base = `${sceneId}-to-${targetId.slice(prefix.length)}`;
