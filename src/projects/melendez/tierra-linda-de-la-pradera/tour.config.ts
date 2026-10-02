@@ -93,6 +93,11 @@ export const tierraLindaTipoF: TourConfig = {
               description: 'Sala y comedor integrados',
               panorama: PANO_F('sala-comedor.jpg'),
               defaultView: { pitch: 0, yaw: 0, hfov: 100 },
+              playbackAnimations: [
+                { from: { pitch: -0.3, yaw: 88.1 }, to: { pitch: -0.7, yaw: 162.6 } },
+                { from: { pitch: -6.5, yaw: -51.4 }, to: { pitch: -6.5, yaw: -51.4 } },
+                { from: { pitch: -1.1, yaw: 35.8 }, to: { pitch: -1.1, yaw: 35.8 } },
+              ],
               hotspots: [
                 {
                   id: 'tl-tf-sala-to-balcon',
@@ -136,6 +141,9 @@ export const tierraLindaTipoF: TourConfig = {
               description: 'Cocina',
               panorama: PANO_F('cocina.jpg'),
               defaultView: { pitch: 0, yaw: 0, hfov: 100 },
+              playbackAnimations: [
+                { from: { pitch: -7.1, yaw: 154.3 }, to: { pitch: -6.9, yaw: -43 } },
+              ],
               hotspots: [
                 {
                   id: 'tl-tf-cocina-to-balcon',
@@ -163,6 +171,9 @@ export const tierraLindaTipoF: TourConfig = {
               description: 'Balcón',
               panorama: PANO_F('balcon.jpg'),
               defaultView: { pitch: 0, yaw: 0, hfov: 100 },
+              playbackAnimations: [
+                { from: { pitch: -0.9, yaw: 2.9 }, to: { pitch: -2.9, yaw: 139.5 } },
+              ],
               hotspots: [
                 {
                   id: 'tl-tf-balcon-to-sala-comedor',
@@ -190,6 +201,9 @@ export const tierraLindaTipoF: TourConfig = {
               description: 'Estudio',
               panorama: PANO_F('estudio.jpg'),
               defaultView: { pitch: 0, yaw: 0, hfov: 100 },
+              playbackAnimations: [
+                { from: { pitch: -5.2, yaw: 109.3 }, to: { pitch: -4.9, yaw: -91.1 } },
+              ],
               hotspots: [
                 {
                   id: 'tl-tf-estudio-to-opcion-multiple',
@@ -233,6 +247,9 @@ export const tierraLindaTipoF: TourConfig = {
               description: 'Alcoba principal',
               panorama: PANO_F('alcoba-principal.jpg'),
               defaultView: { pitch: 0, yaw: 0, hfov: 100 },
+              playbackAnimations: [
+                { from: { pitch: -0.8, yaw: -100.1 }, to: { pitch: -1.2, yaw: 172.7 } },
+              ],
               hotspots: [
                 {
                   id: 'tl-tf-alcoba-principal-to-vestier',
@@ -284,6 +301,9 @@ export const tierraLindaTipoF: TourConfig = {
               description: 'Vestier de la alcoba principal',
               panorama: PANO_F('vestier-alcoba-principal.jpg'),
               defaultView: { pitch: 0, yaw: 0, hfov: 100 },
+              playbackAnimations: [
+                { from: { pitch: -2.6, yaw: 129 }, to: { pitch: -1.8, yaw: -73.9 } },
+              ],
               hotspots: [
                 {
                   id: 'tl-tf-vestier-to-alcoba-principal',
@@ -303,6 +323,9 @@ export const tierraLindaTipoF: TourConfig = {
               description: 'Segunda alcoba',
               panorama: PANO_F('alcoba-auxiliar.jpg'),
               defaultView: { pitch: 0, yaw: 0, hfov: 100 },
+              playbackAnimations: [
+                { from: { pitch: 0.6, yaw: 0.6 }, to: { pitch: -2.3, yaw: -67 } },
+              ],
               hotspots: [
                 {
                   id: 'tl-tf-alcoba-auxiliar-to-estudio',
@@ -333,6 +356,9 @@ export const tierraLindaTipoF: TourConfig = {
               description: 'Espacio flexible: habitación o sala de TV',
               panorama: PANO_F('opcion-multiple-habitacion.jpg'),
               defaultView: { pitch: 0, yaw: 0, hfov: 100 },
+              playbackAnimations: [
+                { from: { pitch: -2.4, yaw: 86.8 }, to: { pitch: -3.8, yaw: -26.4 } },
+              ],
               variants: [
                 {
                   id: 'habitacion',
@@ -446,6 +472,7 @@ export const tierraLindaTipoF: TourConfig = {
   autoRotateSpeed: -0.5,
   showFloorPlan: true,
   showWelcome: true,
+  playback: { hfov: 120 },
 
   // ─── Plantas arquitectonicas (menu "Plantas" del sidebar) ────────────
   // Imagen completa de la entrega (NAS 05 - Auxiliary Files). OJO: el archivo
