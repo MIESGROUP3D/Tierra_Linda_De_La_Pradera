@@ -811,6 +811,8 @@ const PanoViewer = forwardRef<PanoViewerHandle, PanoViewerProps>(
 
     // Variant activa para la escena actual (re-init del viewer cuando cambia)
     const currentVariantId = selectedVariants[currentSceneId] ?? '';
+    const effectiveVariantId = currentVariantId || currentScene?.variants?.[0]?.id;
+    const videoScreen = currentScene?.variants?.find((v) => v.id === effectiveVariantId)?.videoScreen ?? currentScene?.videoScreen;
 
     // Distinguir el tipo de transicion: 'scene' (cambio de cuarto) vs 'variant' (mismo cuarto)
     const lastSceneRef = useRef<string>('');
@@ -1169,10 +1171,9 @@ const PanoViewer = forwardRef<PanoViewerHandle, PanoViewerProps>(
           }}
         />
 
-        {activePanoramaKey === currentSceneId + ':' + currentVariantId && currentScene?.videoScreen && (!currentScene.videoScreen.variantId ||
-          currentScene.videoScreen.variantId === (selectedVariants[currentSceneId] ?? currentScene.variants?.[0]?.id)) && (
+        {activePanoramaKey === currentSceneId + ':' + currentVariantId && videoScreen && (!videoScreen.variantId || videoScreen.variantId === effectiveVariantId) && (
           <PanoramaVideo key={currentSceneId + (selectedVariants[currentSceneId] ?? '')}
-            screen={currentScene.videoScreen} viewerRef={viewerRef} transitioning={isTransitioning} />
+            screen={videoScreen} viewerRef={viewerRef} transitioning={isTransitioning} />
         )}
 
         {/* Fade overlay */}

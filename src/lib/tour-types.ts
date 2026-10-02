@@ -26,6 +26,7 @@ export interface HotspotConfig {
 // Ej: "Espacio Multiple" puede verse como alcoba o como estudio.
 // Si la escena tiene variants[], se muestra un boton flotante para alternar.
 export interface SceneVariantConfig {
+  videoScreen?: PanoramaVideoConfig;
   id: string;
   label: string;
   /** Panorama de la variante (opcional si linkSceneId esta presente). */
@@ -92,6 +93,8 @@ export interface SceneConfig {
 
 // ─── Floor Plan Room ─────────────────────────────────────────────────
 export interface FloorPlanRoomConfig {
+  /** Optional furnishing variant selected by this floor-plan point. */
+  variantId?: string;
   id: string;
   sceneId: string;
   label: string;

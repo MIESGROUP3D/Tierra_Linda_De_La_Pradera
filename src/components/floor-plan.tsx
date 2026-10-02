@@ -15,9 +15,14 @@ export default function FloorPlan() {
   const toggleFloorPlan = useTourStore((s) => s.toggleFloorPlan);
   const setCurrentScene = useTourStore((s) => s.setCurrentScene);
 
+  const selectedVariants = useTourStore((s) => s.selectedVariants);
+  const setSceneVariant = useTourStore((s) => s.setSceneVariant);
+  const activeScene = selectedApartment?.scenes.find((s) => s.id === currentSceneId);
+  const currentVariantId = selectedVariants[currentSceneId] ?? activeScene?.variants?.[0]?.id;
   const floorPlan = selectedApartment?.floorPlan;
   const rooms: FloorPlanRoomConfig[] = floorPlan?.rooms ?? [];
 
+  const currentRoom = rooms.find((r) => r.sceneId === currentSceneId && (!r.variantId || r.variantId === currentVariantId));
   const [expanded, setExpanded] = useState(false);
   const isMobile = useIsMobile();
 
@@ -33,14 +38,14 @@ export default function FloorPlan() {
 
   // Devuelve la posicion efectiva (override si existe, si no la original)
   const effectiveDot = (room: FloorPlanRoomConfig) => {
-    const ov = debugOverrides[room.sceneId];
+    const ov = debugOverrides[room.id];
     if (ov) return ov;
     return { dotX: room.dotX ?? 50, dotY: room.dotY ?? 50 };
   };
 
   // Offset efectivo del radar (override de debug si existe, si no el del config).
   const effectiveRadarOffset = (room: FloorPlanRoomConfig) =>
-    radarOffsets[room.sceneId] ?? room.radarYawOffset ?? 0;
+    radarOffsets[room.id] ?? room.radarYawOffset ?? 0;
 
   // Convierte el evento de mouse a coordenadas (%) dentro del SVG
   const eventToPct = (e: React.MouseEvent | MouseEvent) => {
@@ -75,11 +80,11 @@ export default function FloorPlan() {
   const debugCopyAll = useCallback(() => {
     if (!rooms.length) return;
     const lines = rooms.map((r) => {
-      const ov = debugOverrides[r.sceneId];
+      const ov = debugOverrides[r.id];
       const dx = ov?.dotX ?? r.dotX ?? 0;
       const dy = ov?.dotY ?? r.dotY ?? 0;
-      const off = radarOffsets[r.sceneId] ?? r.radarYawOffset ?? 0;
-      return `  { sceneId: '${r.sceneId}', dotX: ${dx}, dotY: ${dy}, radarYawOffset: ${off} },`;
+      const off = radarOffsets[r.id] ?? r.radarYawOffset ?? 0;
+      return `  { id: '${r.id}', sceneId: '${r.sceneId}',${r.variantId ? ` variantId: '${r.variantId}',` : ''} dotX: ${dx}, dotY: ${dy}, radarYawOffset: ${off} },`;
     });
     const out = '// Calibrado — pegar dotX/dotY/radarYawOffset en cada room\n' + lines.join('\n');
     try {
@@ -97,16 +102,17 @@ export default function FloorPlan() {
   const primary = '#FFFFFF';
 
   const currentScene = selectedApartment?.scenes?.find((s) => s.id === currentSceneId);
-  const currentSceneName = currentScene?.name ?? '';
+  const currentSceneName = currentRoom?.label ?? currentScene?.name ?? '';
 
   // Si hay backgroundImage, usamos el modo imagen real
   const hasBackgroundImage = Boolean(floorPlan?.backgroundImage);
 
   const handleRoomClick = useCallback(
-    (sceneId: string) => {
-      setCurrentScene(sceneId);
+    (room: FloorPlanRoomConfig) => {
+      if (room.variantId) setSceneVariant(room.sceneId, room.variantId);
+      setCurrentScene(room.sceneId);
     },
-    [setCurrentScene],
+    [setCurrentScene, setSceneVariant],
   );
 
   const toggleExpand = useCallback(() => {
@@ -128,19 +134,19 @@ export default function FloorPlan() {
   // (Shift = ±5°). El valor se ve en el panel debug y se incluye en "copiar todo".
   useEffect(() => {
     if (!debugEnabled) return;
-    const room = rooms.find((r) => r.sceneId === currentSceneId);
+    const room = currentRoom;
     if (!room) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== '[' && e.key !== ']') return;
       const t = e.target as HTMLElement;
       if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
-      const base = radarOffsets[room.sceneId] ?? room.radarYawOffset ?? 0;
+      const base = radarOffsets[room.id] ?? room.radarYawOffset ?? 0;
       const step = (e.shiftKey ? 5 : 1) * (e.key === ']' ? 1 : -1);
-      setRadarOffsets((prev) => ({ ...prev, [room.sceneId]: Math.round((base + step) * 10) / 10 }));
+      setRadarOffsets((prev) => ({ ...prev, [room.id]: Math.round((base + step) * 10) / 10 }));
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [debugEnabled, currentSceneId, rooms, radarOffsets]);
+  }, [debugEnabled, currentRoom, radarOffsets]);
 
   if (!showFloorPlan) return null;
   // Sin habitaciones (p.ej. Amenities) no hay plano que mostrar.
@@ -166,7 +172,7 @@ export default function FloorPlan() {
   // En debug, aplica los overrides en memoria.
   const getDotPoint = (room: FloorPlanRoomConfig) => {
     if (hasBackgroundImage) {
-      const ov = debugOverrides[room.sceneId];
+      const ov = debugOverrides[room.id];
       const dx = ov?.dotX ?? room.dotX;
       const dy = ov?.dotY ?? room.dotY;
       if (dx !== undefined && dy !== undefined) {
@@ -392,7 +398,7 @@ export default function FloorPlan() {
 
                 {/* Rooms: rect transparente como area de click + burbuja cyan en dotX/dotY */}
                 {rooms.map((room) => {
-                  const isCurrent = room.sceneId === currentSceneId;
+                  const isCurrent = room.id === currentRoom?.id;
                   const dot = getDotPoint(room);
                   const rx = room.x * scaleX;
                   const ry = room.y * scaleY;
@@ -414,20 +420,21 @@ export default function FloorPlan() {
                   // Tamano del label
                   const fontSize = expanded ? 12 : 8;
 
-                  const isDragging = draggingScene === room.sceneId;
+                  const isDragging = draggingScene === room.id;
                   return (
                     <g
-                      key={room.sceneId}
+                      key={room.id}
+                      onKeyDown={(e) => { if (!debugEnabled && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); e.stopPropagation(); handleRoomClick(room); } }}
                       style={{ cursor: debugEnabled ? (isDragging ? 'grabbing' : 'grab') : 'pointer' }}
                       onMouseDown={(e) => {
                         if (debugEnabled) {
                           e.stopPropagation();
-                          setDraggingScene(room.sceneId);
+                          setDraggingScene(room.id);
                         }
                       }}
                       onClick={() => {
                         // En debug, no navegamos al hacer click — el mousedown ya inicio drag
-                        if (!debugEnabled) handleRoomClick(room.sceneId);
+                        if (!debugEnabled) handleRoomClick(room);
                       }}
                       role="button"
                       tabIndex={0}
@@ -585,7 +592,7 @@ export default function FloorPlan() {
 
                 {/* Rooms (modo clasico) */}
                 {rooms.map((room) => {
-                  const isCurrent = room.sceneId === currentSceneId;
+                  const isCurrent = room.id === currentRoom?.id;
                   const rx = room.x * scaleX;
                   const ry = room.y * scaleY;
                   const rw = room.width * scaleX;
@@ -596,9 +603,10 @@ export default function FloorPlan() {
 
                   return (
                     <g
-                      key={room.sceneId}
+                      key={room.id}
+                      onKeyDown={(e) => { if (!debugEnabled && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); e.stopPropagation(); handleRoomClick(room); } }}
                       className="cursor-pointer"
-                      onClick={() => handleRoomClick(room.sceneId)}
+                      onClick={() => handleRoomClick(room)}
                       role="button"
                       tabIndex={0}
                       aria-label={`Go to ${room.label}`}
@@ -716,7 +724,7 @@ export default function FloorPlan() {
                   <span style={{ color: '#FFFFFF', fontWeight: 400, marginLeft: 6 }}>
                     · {currentSceneName} radarYawOffset{' '}
                     <b style={{ color: '#5DD5F0' }}>
-                      {radarOffsets[currentSceneId] ?? (rooms.find((r) => r.sceneId === currentSceneId)?.radarYawOffset ?? 0)}°
+                      {(currentRoom ? radarOffsets[currentRoom.id] ?? currentRoom.radarYawOffset : 0) ?? 0}°
                     </b>
                   </span>
                 )}
@@ -747,10 +755,10 @@ export default function FloorPlan() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))', gap: 4 }}>
               {rooms.map((room) => {
                 const d = effectiveDot(room);
-                const edited = Boolean(debugOverrides[room.sceneId]);
+                const edited = Boolean(debugOverrides[room.id]);
                 return (
                   <div
-                    key={room.sceneId}
+                    key={room.id}
                     style={{
                       padding: '3px 6px', borderRadius: 3, fontSize: 10,
                       background: edited ? 'rgba(93,213,240,0.12)' : 'rgba(255,255,255,0.04)',

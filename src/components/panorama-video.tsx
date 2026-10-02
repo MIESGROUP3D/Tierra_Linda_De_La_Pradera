@@ -3,6 +3,10 @@
 import { useEffect, useRef, useState, type RefObject } from 'react';
 import type { PanoramaVideoConfig } from '@/lib/tour-types';
 import { projectScreen, screenPlane } from '@/lib/panorama-video-projection';
+import dynamic from 'next/dynamic';
+const VideoFrameDebug = process.env.NODE_ENV !== 'production'
+  ? dynamic(() => import('./video-frame-debug'), { ssr: false })
+  : () => null;
 
 type Viewer = { getPitch:()=>number; getYaw:()=>number; getHfov:()=>number; isLoaded?:()=>boolean };
 
@@ -19,10 +23,13 @@ export default function PanoramaVideo({ screen, viewerRef, transitioning }: {
   const [muted,setMuted]=useState(true);
   const [failed,setFailed]=useState(false);
   const blocked=useRef(false);
+  const debugEnabled=process.env.NODE_ENV !== 'production' && typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('debug')==='1';
+  const [corners,setCorners]=useState(screen.corners);
+  const [debugOpacity,setDebugOpacity]=useState(1);
 
   useEffect(()=>{
     const video=videoRef.current, host=hostRef.current;
-    const plane=screenPlane(screen.corners);
+    const plane=screenPlane(corners);
     if(!video || !host || !plane) return;
     let raf=0, wasVisible=false, pending=false, disposed=false;
     const tick=()=>{
@@ -43,7 +50,7 @@ export default function PanoramaVideo({ screen, viewerRef, transitioning }: {
     };
     raf=requestAnimationFrame(tick);
     return ()=>{disposed=true; cancelAnimationFrame(raf); video.muted=true; video.pause();};
-  },[screen,viewerRef,transitioning]);
+  },[screen,corners,viewerRef,transitioning]);
 
   async function toggleAudio() {
     const video=videoRef.current;
@@ -97,7 +104,8 @@ export default function PanoramaVideo({ screen, viewerRef, transitioning }: {
         onPlaying={()=>setPlaying(true)} onPause={()=>setPlaying(false)} onError={()=>setFailed(true)}
         onVolumeChange={()=>{if(videoRef.current) setMuted(videoRef.current.muted);}}
         aria-label="Video de Tierra Linda en el televisor"
-        style={{display:'block',width:'100%',height:'100%',opacity:playing?1:0,objectFit:'contain',background:'#000'}} />
+        style={{display:'block',width:'100%',height:'100%',opacity:playing?debugOpacity:0,objectFit:'contain',background:'#000'}} />
     </button>
+    {debugEnabled && <VideoFrameDebug screen={screen} corners={corners} onChange={setCorners} viewerRef={viewerRef} hostRef={hostRef} transitioning={transitioning} opacity={debugOpacity} onOpacity={setDebugOpacity} />}
   </div>;
 }
