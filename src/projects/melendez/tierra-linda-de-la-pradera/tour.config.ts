@@ -243,6 +243,15 @@ export const tierraLindaTipoF: TourConfig = {
             // --- ESCENA: ALCOBA PRINCIPAL ---
             {
               id: 'tl-tf-alcoba-principal',
+              videoScreen: {
+                src: assetPath('/projects/melendez/tierra-linda-de-la-pradera/videos/televisor-opcion-multiple-hd.mp4'),
+                corners: [
+                  { yaw: 110.56641, pitch: 23.55469 },
+                  { yaw: 161.89453, pitch: 8.26172 },
+                  { yaw: 161.89453, pitch: -17.05078 },
+                  { yaw: 110.91797, pitch: -43.59375 },
+                ],
+              },
               name: 'Alcoba Principal',
               description: 'Alcoba principal',
               panorama: PANO_F('alcoba-principal.jpg'),
@@ -319,6 +328,15 @@ export const tierraLindaTipoF: TourConfig = {
             // --- ESCENA: ALCOBA AUXILIAR ---
             {
               id: 'tl-tf-alcoba-auxiliar',
+              videoScreen: {
+                src: assetPath('/projects/melendez/tierra-linda-de-la-pradera/videos/televisor-opcion-multiple-hd.mp4'),
+                corners: [
+                  { yaw: 11.03019, pitch: 6.01533 },
+                  { yaw: 26.46497, pitch: 14.01848 },
+                  { yaw: 26.30834, pitch: -27.98216 },
+                  { yaw: 11.02962, pitch: -12.61381 },
+                ],
+              },
               name: 'Alcoba Auxiliar',
               description: 'Segunda alcoba',
               panorama: PANO_F('alcoba-auxiliar.jpg'),
@@ -352,6 +370,17 @@ export const tierraLindaTipoF: TourConfig = {
             // PENDIENTE: ubicar variantButton con ?debug=1
             {
               id: 'tl-tf-opcion-multiple',
+              videoScreen: {
+                src: assetPath('/projects/melendez/tierra-linda-de-la-pradera/videos/televisor-opcion-multiple-hd.mp4'),
+                variantId: 'habitacion',
+                // Inner TV bezel, calibrated on the equirectangular panorama.
+                corners: [
+                  { yaw: -64.33594, pitch: 28.82813 },
+                  { yaw: -14.76563, pitch: 8.4375 },
+                  { yaw: -14.76563, pitch: -17.22656 },
+                  { yaw: -63.98438, pitch: -48.51563 },
+                ],
+              },
               name: 'Opción Múltiple',
               description: 'Espacio flexible: habitación o sala de TV',
               panorama: PANO_F('opcion-multiple-habitacion.jpg'),

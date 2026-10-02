@@ -58,7 +58,18 @@ export interface PlaybackAnimation {
   to:   { pitch: number; yaw: number };
 }
 
+/** Screen corners in panorama coordinates, clockwise from top left. */
+export interface PanoramaVideoConfig {
+  src: string;
+  variantId?: string;
+  corners: [
+    { pitch: number; yaw: number }, { pitch: number; yaw: number },
+    { pitch: number; yaw: number }, { pitch: number; yaw: number },
+  ];
+}
+
 export interface SceneConfig {
+  videoScreen?: PanoramaVideoConfig;
   id: string;
   name: string;
   panorama: string;

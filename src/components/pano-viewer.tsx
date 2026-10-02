@@ -10,6 +10,7 @@ import {
 } from 'react';
 import type { HotspotConfig } from '@/lib/tour-types';
 import BrandLogo from '@/components/brand-logo';
+import PanoramaVideo from '@/components/panorama-video';
 import {
   shortYawDiff,
   panDurationMs,
@@ -526,6 +527,8 @@ const PanoViewer = forwardRef<PanoViewerHandle, PanoViewerProps>(
     const [activeLayer, setActiveLayer] = useState<'A' | 'B'>('A');
     const [layerAOpacity, setLayerAOpacity] = useState(1);
     const [layerBOpacity, setLayerBOpacity] = useState(0);
+    const [transitionRetry, setTransitionRetry] = useState(0);
+    const [activePanoramaKey, setActivePanoramaKey] = useState('');
 
     /* ── Refs ──────────────────────────────────────────────────── */
     const containerARef = useRef<HTMLDivElement>(null);
@@ -553,6 +556,7 @@ const PanoViewer = forwardRef<PanoViewerHandle, PanoViewerProps>(
     const autoRotateSpeed = useTourStore((s) => s.config.autoRotateSpeed);
     const isPlaybackMode = useTourStore((s) => s.isPlaybackMode);
     const setTransitioning = useTourStore((s) => s.setTransitioning);
+    const isTransitioning = useTourStore((s) => s.isTransitioning);
     const setViewerYaw = useTourStore((s) => s.setViewerYaw);
     const themePrimary = useTourStore((s) => s.config.theme.primary);
     const selectedVariants = useTourStore((s) => s.selectedVariants);
@@ -823,11 +827,21 @@ const PanoViewer = forwardRef<PanoViewerHandle, PanoViewerProps>(
     ──────────────────────────────────────────────────────────── */
     useEffect(() => {
       if (!scriptReady || !currentSceneId) return;
-      if (transitionLock.current) return;
+      if (transitionLock.current) {
+        // Apply the latest requested scene once the current crossfade finishes.
+        const retry = setInterval(() => {
+          if (!transitionLock.current) {
+            clearInterval(retry);
+            setTransitionRetry((value) => value + 1);
+          }
+        }, 30);
+        return () => clearInterval(retry);
+      }
 
       // Primera carga: no hay viewer todavia → init directo en layer A
       if (!viewerARef.current && !viewerBRef.current) {
         lastSceneRef.current = currentSceneId;
+        setActivePanoramaKey(currentSceneId + ':' + currentVariantId);
         activeLayerRef.current = 'A';
         setActiveLayer('A');
         initViewerOnLayer('A', currentSceneId);
@@ -876,7 +890,11 @@ const PanoViewer = forwardRef<PanoViewerHandle, PanoViewerProps>(
       const inactive: 'A' | 'B' = active === 'A' ? 'B' : 'A';
       const newViewer = initViewerOnLayer(inactive, currentSceneId, preservedView);
 
+      let crossfaded = false;
       const doCrossfade = () => {
+        if (crossfaded) return;
+        crossfaded = true;
+        setActivePanoramaKey(currentSceneId + ':' + currentVariantId);
         // Crossfade: el inactivo se vuelve visible, el activo desaparece
         activeLayerRef.current = inactive;
         setActiveLayer(inactive);
@@ -940,7 +958,7 @@ const PanoViewer = forwardRef<PanoViewerHandle, PanoViewerProps>(
       } else {
         doCrossfade();
       }
-    }, [scriptReady, currentSceneId, currentVariantId, debugRev, initViewerOnLayer, setTransitioning]);
+    }, [scriptReady, currentSceneId, currentVariantId, debugRev, initViewerOnLayer, setTransitioning, transitionRetry]);
 
     /* ── Fullscreen change handler ─────────────────────────────── */
     useEffect(() => {
@@ -1150,6 +1168,12 @@ const PanoViewer = forwardRef<PanoViewerHandle, PanoViewerProps>(
             zIndex: activeLayer === 'B' ? 2 : 1,
           }}
         />
+
+        {activePanoramaKey === currentSceneId + ':' + currentVariantId && currentScene?.videoScreen && (!currentScene.videoScreen.variantId ||
+          currentScene.videoScreen.variantId === (selectedVariants[currentSceneId] ?? currentScene.variants?.[0]?.id)) && (
+          <PanoramaVideo key={currentSceneId + (selectedVariants[currentSceneId] ?? '')}
+            screen={currentScene.videoScreen} viewerRef={viewerRef} transitioning={isTransitioning} />
+        )}
 
         {/* Fade overlay */}
         <div
